@@ -1,0 +1,81 @@
+.topbar {
+  height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+/* Brand */
+.brand {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* User */
+.user {
+  position: relative;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.user-btn:hover {
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+/* Avatar */
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #2F6FED;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Name */
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Menu */
+.menu {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  min-width: 120px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.menu button {
+  width: 100%;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: #f9fafb;
+}

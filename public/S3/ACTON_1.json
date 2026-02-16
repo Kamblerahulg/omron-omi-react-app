@@ -1,0 +1,42 @@
+{
+  "document_type": "purchase_order",
+  "Company": "ACTON TECHNOLOGY PTE. LTD.",
+  "Sold To": "12104470",
+  "SoldTo Address": "11 Woodlands Close, #09-27 Woodlands 11, Singapore, 737853",
+  "Multiple Ship To": "No",
+  "Ship To": "12500283",
+  "ShipTo Address": "C/o Savino Del Bene (S) Pte Ltd, 3 Changi South Street 2, Xilin Districenter Block B,# 01-02, Singapore, SG, 486548",
+  "Multiple Currency": "No",
+  "Currency": "USD",
+  "Customer PO": "ATSPO25-9864",
+  "items": [
+    {
+      "Customer Part No": "XG4C-1031",
+      "Requested Date": "09-06-2026",
+      "Quantity": "750",
+      "Unit Price": "0.15700",
+      "Sales Unit Price Basis": "1"
+    }
+  ],
+  "confidence_scores": {
+    "overall_confidence": 0.95,
+    "field_confidence": {
+      "Company": 0.99,
+      "Sold To": 1.0,
+      "SoldTo Address": 0.98,
+      "Multiple Ship To": 1.0,
+      "Ship To": 1.0,
+      "ShipTo Address": 0.97,
+      "Multiple Currency": 1.0,
+      "Currency": 0.99,
+      "Customer PO": 0.99,
+      "items": {
+        "Customer Part No": 0.99,
+        "Requested Date": 0.98,
+        "Quantity": 0.99,
+        "Unit Price": 0.99,
+        "Sales Unit Price Basis": 0.95
+      }
+    }
+  }
+}

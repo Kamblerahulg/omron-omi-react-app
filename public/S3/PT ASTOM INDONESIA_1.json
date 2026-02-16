@@ -1,0 +1,116 @@
+{
+  "document_type": "invoice",
+  "InvoiceVendor_Name": "PT ASTOM INDONESIA",
+  "Invoice_Number": "AST-25VIII11-06(SK)",
+  "Invoice_DeliveryNoteNumber": "0000146552",
+  "Invoice_Date": "2025-08-11",
+  "Invoice_TotalPrice": "1246.02",
+  "Invoice_TotalQuantity": "181900.00",
+  "items": [
+    {
+      "Invoice_PO_Number": "U0P4358921-01",
+      "Invoice_ItemCode": "9455801-2",
+      "Invoice_ItemName": "D3DC MOVING PLATE 02",
+      "Invoice_ItemQty": "20000.00",
+      "Invoice_ItemQtyUnitOfMeasurement": "PC",
+      "Invoice_ItemUnitPrice": "0.006850",
+      "Invoice_ItemCurrencyCode": "USD",
+      "Invoice_ItemTotalPrice": "137.0000"
+    },
+    {
+      "Invoice_PO_Number": "U0P4396548-01",
+      "Invoice_ItemCode": "9455801-2",
+      "Invoice_ItemName": "D3DC MOVING PLATE 02",
+      "Invoice_ItemQty": "161900.00",
+      "Invoice_ItemQtyUnitOfMeasurement": "PC",
+      "Invoice_ItemUnitPrice": "0.006850",
+      "Invoice_ItemCurrencyCode": "USD",
+      "Invoice_ItemTotalPrice": "1109.0150"
+    }
+  ],
+  "overall_confidence_score": 0.96,
+  "field_confidence_scores": {
+    "InvoiceVendor_Name": 0.99,
+    "Invoice_Number": 0.98,
+    "Invoice_DeliveryNoteNumber": 0.97,
+    "Invoice_Date": 0.98,
+    "Invoice_TotalPrice": 0.97,
+    "Invoice_TotalQuantity": 0.96,
+    "items": [
+      {
+        "Invoice_PO_Number": 0.95,
+        "Invoice_ItemCode": 0.97,
+        "Invoice_ItemName": 0.96,
+        "Invoice_ItemQty": 0.97,
+        "Invoice_ItemQtyUnitOfMeasurement": 0.98,
+        "Invoice_ItemUnitPrice": 0.96,
+        "Invoice_ItemCurrencyCode": 0.99,
+        "Invoice_ItemTotalPrice": 0.96
+      },
+      {
+        "Invoice_PO_Number": 0.95,
+        "Invoice_ItemCode": 0.97,
+        "Invoice_ItemName": 0.96,
+        "Invoice_ItemQty": 0.97,
+        "Invoice_ItemQtyUnitOfMeasurement": 0.98,
+        "Invoice_ItemUnitPrice": 0.96,
+        "Invoice_ItemCurrencyCode": 0.99,
+        "Invoice_ItemTotalPrice": 0.96
+      }
+    ]
+  }
+},
+{
+  "document_type": "delivery_notes",
+  "DO_Vendor_Name": "PT ASTOM INDONESIA",
+  "DO_CustomDocumentDate": "2025-08-11",
+  "DO_CustomDocumentType": "BC 2.7",
+  "DO_CustomDocumentNumber": "000027-010712-20250811",
+  "DO_DeliveryNoteNumber": "0000146552",
+  "DO_DeliveryDate": "2025-08-11",
+  "DO_TotalQuantity": "181900.00",
+  "DO_InvoiceNumber": "001104/AST/DEL/VIII/2025SK",
+  "items": [
+    {
+      "DO_ItemCode": "9455801-2",
+      "DO_ItemName": "D3DC MOVING PLATE 02",
+      "DO_ItemQty": "20000.00",
+      "DO_ItemUnitMeasurement": "PC",
+      "DO_Item_PO_Number": "U0P4358921-01"
+    },
+    {
+      "DO_ItemCode": "9455801-2",
+      "DO_ItemName": "D3DC MOVING PLATE 02",
+      "DO_ItemQty": "161900.00",
+      "DO_ItemUnitMeasurement": "PC",
+      "DO_Item_PO_Number": "U0P4396548-01"
+    }
+  ],
+  "overall_confidence_score": 0.96,
+  "field_confidence_scores": {
+    "DO_Vendor_Name": 0.99,
+    "DO_CustomDocumentDate": 0.98,
+    "DO_CustomDocumentType": 0.97,
+    "DO_CustomDocumentNumber": 0.96,
+    "DO_DeliveryNoteNumber": 0.99,
+    "DO_DeliveryDate": 0.98,
+    "DO_TotalQuantity": 0.97,
+    "DO_InvoiceNumber": 0.98,
+    "items": [
+      {
+        "DO_ItemCode": 0.97,
+        "DO_ItemName": 0.96,
+        "DO_ItemQty": 0.98,
+        "DO_ItemUnitMeasurement": 0.99,
+        "DO_Item_PO_Number": 0.95
+      },
+      {
+        "DO_ItemCode": 0.97,
+        "DO_ItemName": 0.96,
+        "DO_ItemQty": 0.98,
+        "DO_ItemUnitMeasurement": 0.99,
+        "DO_Item_PO_Number": 0.95
+      }
+    ]
+  }
+}
