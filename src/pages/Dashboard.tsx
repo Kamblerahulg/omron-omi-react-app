@@ -118,44 +118,30 @@ const Dashboard = () => {
     setAuditOpen(true);
   };
 
-  const modernField = {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 2,
-    minWidth: 100,
+  const compactFilter = {
+    width: 110,
+
+    "& .MuiInputLabel-root": {
+      fontSize: 10,          // 🔥 smaller label
+    },
 
     "& .MuiOutlinedInput-root": {
-      transition: "all 0.3s ease",
-      backgroundColor: "#FFFFFF",
+      height: 30,            // 🔥 reduced height
+      fontSize: 11,          // 🔥 smaller text
+      backgroundColor: "#fff",
 
       "& fieldset": {
         borderColor: "#E5E7EB",
       },
-
-      "&:hover fieldset": {
-        borderColor: "#CBD5E1",
-      },
-
-      "&.Mui-focused": {
-        transform: "translateY(-1px) scale(1.01)",
-        boxShadow: "0 6px 20px rgba(47,111,237,0.15)",
-
-        "& fieldset": {
-          borderColor: "#2F6FED",
-          borderWidth: 1.5,
-        },
-      },
     },
 
-    "& .MuiInputLabel-root": {
-      fontSize: 13,
-      color: "#6B7280",
-    },
-
-    "& .MuiInputBase-input": {
-      fontSize: 14,
-      padding: "10px 12px",
+    "& .MuiOutlinedInput-input": {
+      padding: "4px 8px",    // 🔥 tighter padding
+      fontSize: 11,
     },
   };
+
+
 
   // 🔹 Example data (replace with API/DynamoDB)
   const auditHistory = [
@@ -332,7 +318,7 @@ const Dashboard = () => {
       <Box>
         <Typography
           fontFamily={`"Shorai Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`}
-          fontSize={22}
+          fontSize={18}
           fontWeight={600}
           mb={1}
         >
@@ -344,19 +330,20 @@ const Dashboard = () => {
       {/* ================= Filters ================= */}
       <Box
         display="flex"
-        gap={2}
+        alignItems="center"
+        gap={1}
         mb={1}
         sx={{
-          p: 2,
-          borderRadius: 3,
-          background: "rgba(255,255,255,0.75)",
-          border: "1px solid rgba(226,232,240,0.8)",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.08)",
-          backdropFilter: "blur(12px)",
-          // position: "sticky",
+          p: 1,
+          borderRadius: 2,
+          background: "#fff",
+          border: "1px solid #E5E7EB",
+          overflowX: "auto",     // 🔥 allows scroll instead of wrap
+          whiteSpace: "nowrap",  // 🔥 force single row
         }}
-
       >
+
+
         {/* Start Date */}
         <TextField
           type="date"
@@ -365,27 +352,27 @@ const Dashboard = () => {
           InputLabelProps={{ shrink: true }}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          sx={modernField}
+          sx={compactFilter}
         />
 
         {/* End Date */}
         <TextField
           type="date"
           size="small"
-          label="End Date"
+          label="Start Date"
           InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          sx={modernField}
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          sx={compactFilter}
         />
-        <FormControl size="small" sx={{ minWidth: 100 }}>
+        <FormControl size="small" sx={compactFilter}>
           <InputLabel id="bu-label">BU</InputLabel>
           <Select
             labelId="bu-label"
             value={bu}
             label="BU"
             onChange={(e) => setBu(e.target.value)}
-            sx={modernField}
+            sx={compactFilter}
           >
             <MenuItem value="">
               <em>All BU</em>
@@ -403,6 +390,10 @@ const Dashboard = () => {
         <Autocomplete
           size="small"
           options={supplierList}
+          sx={{
+            ...compactFilter,
+            width: 180,   // slightly wider than others
+          }}
           open={supplierOpen}
           inputValue={supplierInput}
           onInputChange={(event, newInputValue) => {
@@ -411,99 +402,27 @@ const Dashboard = () => {
             setSupplierSearch(newInputValue);
           }}
           onClose={() => setSupplierOpen(false)}
-          getOptionLabel={(option) => option}
-          filterOptions={(options, { inputValue }) => {
-            const normalizedInput = inputValue
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .toLowerCase();
-
-            return options.filter((option) => {
-              const normalizedOption = option
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase();
-              return normalizedOption.includes(normalizedInput);
-            });
-          }}
           renderInput={(params) => (
             <TextField
               {...params}
               label="Supplier Name"
-              placeholder="Type supplier name..."
               size="small"
-              sx={{
-                ...modernField,
-                minWidth: 100,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",       // same as Select
-                  '& fieldset': {
-                    borderColor: "#ccc",     // normal border color
-                    borderWidth: 1,
-                  },
-                  '&:hover fieldset': {
-                    borderColor: "#999",     // hover border
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: "#2F6FED",  // focus border
-                    borderWidth: 2,
-                  },
-                  height: 43,                 // same as Select
-                },
-                "& .MuiOutlinedInput-input": {
-                  padding: "8px 12px",        // adjust to match Select text vertical alignment
-                  fontSize: 14,
-                  boxSizing: "border-box",
-                  height: "24px",              // inner input height to align vertically
-                },
-              }}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
             />
-          )}
-          PaperComponent={(props) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                borderRadius: 8,
-                boxShadow: "0px 2px 8px rgba(0,0,0,0.2)",
-                backgroundColor: "#fff",
-                color: "#000",
-              }}
-            />
-          )}
-          ListboxProps={{
-            style: {
-              maxHeight: 200,
-              fontSize: 14,
-              padding: 0,
-            },
-          }}
-          renderOption={(props, option) => (
-            <li
-              {...props}
-              style={{
-                padding: "8px 12px",
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {option}
-            </li>
           )}
         />
 
+
         {/* Status */}
-        <FormControl size="small" sx={{ minWidth: 100 }}>
+        <FormControl size="small" sx={compactFilter}>
+
           <InputLabel id="status-label">Status</InputLabel>
           <Select
             labelId="status-label"
             value={status}
             label="Status"
             onChange={(e) => setStatus(e.target.value)}
-            sx={modernField}
+            sx={compactFilter}
           >
             {STATUS_OPTIONS.map((s) => (
               <MenuItem key={s} value={s}>
@@ -514,14 +433,14 @@ const Dashboard = () => {
         </FormControl>
 
         {/* Reconciliation Status */}
-        <FormControl size="small" sx={{ minWidth: 100 }}>
+        <FormControl size="small" sx={compactFilter}>
           <InputLabel id="recon-label">Reconciliation Status</InputLabel>
           <Select
             labelId="recon-label"
             label="Reconciliation"
             value={reconStatus}
             onChange={(e) => setReconStatus(e.target.value)}
-            sx={modernField}
+            sx={compactFilter}
           >
             <MenuItem value="All">All</MenuItem>
             {RECON_STATUS_OPTIONS.map((s) => (
@@ -532,14 +451,14 @@ const Dashboard = () => {
           </Select>
         </FormControl>
         {/* Invoice Type */}
-        <FormControl size="small" sx={{ minWidth: 100 }}>
+        <FormControl size="small" sx={compactFilter}>
           <InputLabel id="invtype-label">Invoice Type</InputLabel>
           <Select
             labelId="invtype-label"
             label="Invoice Type"
             value={invType}
             onChange={(e) => setInvType(e.target.value)}
-            sx={modernField}
+            sx={compactFilter}
           >
             <MenuItem value="">All</MenuItem>
             {INV_TYPE.map((s) => (
@@ -556,7 +475,7 @@ const Dashboard = () => {
           label="Invoice Number"
           value={invoiceOrder}
           onChange={(e) => setInvoiceOrder(e.target.value)}
-          sx={{ ...modernField, minWidth: 100 }}
+          sx={{ ...compactFilter, minWidth: 100 }}
         />
         {/* BU Filter */}
 
@@ -580,48 +499,57 @@ const Dashboard = () => {
             overflowY: "auto",
           }}
         >
-          <Table stickyHeader sx={{ tableLayout: "fixed", width: "100%" }}>
-            <TableHead sx={{ backgroundColor: "#F9FAFB" }}>
+          <Table
+            stickyHeader
+            size="small"
+            sx={{
+              width: "100%",
+              tableLayout: "auto", // ✅ allow columns to auto-fit
+              "& .MuiTableCell-root": {
+                fontSize: 11,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                paddingTop: 1,
+                paddingBottom: 1,
+              },
+            }}
+          >
+
+            <TableHead
+              sx={{
+                "& .MuiTableCell-root": {
+                  fontWeight: 600,
+                  fontSize: 12,
+                  whiteSpace: "nowrap",
+                  backgroundColor: "#F9FAFB",
+                },
+              }}
+            >
+
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
-                  Processed Date
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
-                  Supplier Name
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
-                  BU
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
-                  Invoice No
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 13,
-                    width: 180,
-                    textAlign: "center",
-                  }}
-                >
+                <TableCell sx={{ width: 110 }}>Processed Date</TableCell>
+                <TableCell sx={{ width: 200 }}>Supplier Name</TableCell>
+                <TableCell sx={{ width: 140 }}>BU</TableCell>
+                <TableCell sx={{ width: 130 }}>Invoice No</TableCell>
+
+                {/* Keep these two CLOSE */}
+                <TableCell sx={{ width: 140, textAlign: "center" }}>
                   Status
                 </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 13,
-                    width: 180,
-                    textAlign: "center",
-                  }}
-                >
+                <TableCell sx={{ width: 160, textAlign: "center" }}>
                   Reconciliation Status
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>
+
+                {/* Make these compact */}
+                <TableCell sx={{ width: 120 }}>
                   Review Data
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 13, textAlign: "center" }}>
+                <TableCell sx={{ width: 110, textAlign: "center" }}>
                   More Details
                 </TableCell>
               </TableRow>
+
             </TableHead>
 
             <TableBody>
@@ -642,18 +570,34 @@ const Dashboard = () => {
                       },
                     }}
                   >
-                    <TableCell sx={{ fontSize: 13 }}>{row.invoiceDate}</TableCell>
-                    <TableCell>
-                      <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
+                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceDate}</TableCell>
+                    <TableCell
+                      sx={{
+                        whiteSpace: "nowrap",        // 🔥 single line
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",    // 🔥 show ...
+                        maxWidth: 220,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         {row.supplierName}
                       </Typography>
                     </TableCell>
+
                     <TableCell>
-                      <Typography sx={{ fontSize: 13 }}>
+                      <Typography sx={{ fontSize: 12 }}>
                         {row.bu}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: 13 }}>{row.invoiceOrderNo}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceOrderNo}</TableCell>
 
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center">
@@ -661,10 +605,11 @@ const Dashboard = () => {
                           label={row.status}
                           size="small"
                           sx={{
-                            minWidth: 100,
-                            fontSize: 12,
+                            height: 18,
+                            fontSize: 10,
                             fontWeight: 700,
                             borderRadius: 999,
+
                             background:
                               row.status === "Approved"
                                 ? "linear-gradient(135deg,#34D399,#059669)"
@@ -703,11 +648,14 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell
                       sx={{
-                        minWidth: 100,
+                        width: 120,
                         fontSize: 13,
                         fontWeight: 600,
                         color: "#2F6FED",
                         cursor: "pointer",
+                        whiteSpace: "nowrap",   // 🔥 add this
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                         "&:hover": { textDecoration: "underline" },
                       }}
                       onClick={() =>
@@ -736,11 +684,10 @@ const Dashboard = () => {
                               backgroundColor: "#FFFFFF",
                               color: "#0F172A",
                               borderRadius: 2,
-                              p: 2.5,
-                              boxShadow: "0 20px 40px rgba(15,23,42,0.18)",
-                              /* 🔥 KEY PART */
-                              maxWidth: 480,          // ⬅️ wider tooltip
-                              minWidth: 100,          // ⬅️ consistent size
+                              p: 2,                     // slightly smaller padding
+                              boxShadow: "0 12px 24px rgba(15,23,42,0.15)", // lighter shadow
+                              maxWidth: 400,             // 🔹 narrower
+                              minWidth: 120,             // 🔹 consistent smaller size
                             },
                           },
                           arrow: {
@@ -751,9 +698,9 @@ const Dashboard = () => {
                           latestRecord ? (
                             <Box>
                               <Typography
-                                fontSize={13}
+                                fontSize={12}         // 🔹 smaller header
                                 fontWeight={700}
-                                mb={1}
+                                mb={0.75}
                                 color="#1E293B"
                               >
                                 More Details
@@ -761,36 +708,39 @@ const Dashboard = () => {
 
                               <Box
                                 sx={{
-                                  height: 1.5,
+                                  height: 1,
                                   backgroundColor: "#E5E7EB",
-                                  my: 1,                 // space above & below
+                                  my: 1,              // slightly smaller spacing
                                 }}
                               />
+
                               <Box
                                 display="grid"
-                                gridTemplateColumns="160px 1fr"
-                                rowGap={1}
-                                columnGap={2}
+                                gridTemplateColumns="140px 1fr" // 🔹 slightly narrower
+                                rowGap={0.75}
+                                columnGap={1.5}
                               >
-                                <Typography fontSize={12} color="text.secondary">
+                                <Typography fontSize={11} color="text.secondary">
                                   Last Reviewed Date
                                 </Typography>
-                                <Typography fontSize={12} fontWeight={600}>
+                                <Typography fontSize={11} fontWeight={600}>
                                   {latestRecord.date}
                                 </Typography>
-                                <Typography fontSize={12} color="text.secondary">
+
+                                <Typography fontSize={11} color="text.secondary">
                                   Reviewed By
                                 </Typography>
-                                <Typography fontSize={12}>{latestRecord.user}</Typography>
-                                <Typography fontSize={12} color="text.secondary">
-                                  Prevoius Status
+                                <Typography fontSize={11}>{latestRecord.user}</Typography>
+
+                                <Typography fontSize={11} color="text.secondary">
+                                  Previous Status
                                 </Typography>
                                 <Chip
                                   label={latestRecord.status}
                                   size="small"
                                   sx={{
-                                    height: 22,
-                                    fontSize: 11,
+                                    height: 20,           // 🔹 smaller
+                                    fontSize: 10,         // 🔹 smaller text
                                     fontWeight: 700,
                                     borderRadius: 999,
                                     background:
@@ -801,31 +751,25 @@ const Dashboard = () => {
                                     width: "fit-content",
                                   }}
                                 />
-                                <Typography fontSize={12} width={160} color="text.secondary">
+
+                                <Typography fontSize={11} width={140} color="text.secondary">
                                   Previous Recon Status
                                 </Typography>
-                                <Typography fontSize={12}>{latestRecord.action}</Typography>
-                                <Typography fontSize={12} color="text.secondary">
+                                <Typography fontSize={11}>{latestRecord.action}</Typography>
+
+                                <Typography fontSize={11} color="text.secondary">
                                   Approver Comment
                                 </Typography>
-
-                                <Typography
-                                  fontSize={12}
-                                  sx={{ whiteSpace: "normal" }}
-                                >
+                                <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
                                   {latestRecord.remark}
                                 </Typography>
-                                <Typography fontSize={12} color="text.secondary">
+
+                                <Typography fontSize={11} color="text.secondary">
                                   Invoice Type
                                 </Typography>
-
-                                <Typography
-                                  fontSize={12}
-                                  sx={{ whiteSpace: "normal" }}
-                                >
+                                <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
                                   {latestRecord.invoicetype}
                                 </Typography>
-
                               </Box>
                             </Box>
                           ) : (
@@ -834,15 +778,20 @@ const Dashboard = () => {
                         }
                       >
                         <IconButton
+                          size="small"
                           sx={{
+                            width: 24,              // 🔹 smaller
+                            height: 24,             // 🔹 smaller
                             backgroundColor: "#EEF2FF",
-                            "&:hover": { backgroundColor: "#E0E7FF", transform: "scale(1.1)" },
+                            padding: 0,
+                            "&:hover": { backgroundColor: "#E0E7FF" },
                           }}
                         >
-                          <VisibilityIcon sx={{ color: "#4338CA" }} />
+                          <VisibilityIcon sx={{ fontSize: 14, color: "#4338CA" }} /> {/* 🔹 smaller */}
                         </IconButton>
                       </Tooltip>
                     </TableCell>
+
                   </TableRow>
                 );
               })}
@@ -865,8 +814,8 @@ const Dashboard = () => {
         >
           <DialogTitle
             sx={{
-              fontWeight: 800,
-              fontSize: 20,
+              fontWeight: 600,
+              fontSize: 16,
               borderBottom: "1px solid #E5E7EB",
               background: "#FFFFFF",
             }}
@@ -920,7 +869,7 @@ const Dashboard = () => {
                               backgroundColor: "#4F46E5",
                             }}
                           />
-                          <Typography fontSize={14} fontWeight={600}>
+                          <Typography fontSize={12} fontWeight={600}>
                             {row.date}
                           </Typography>
                         </Box>
@@ -946,13 +895,13 @@ const Dashboard = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography fontSize={14} fontWeight={500}>
+                        <Typography fontSize={12} fontWeight={500}>
                           {row.user}
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ maxWidth: 300 }}>
                         <Typography
-                          fontSize={14}
+                          fontSize={12}
                           color="text.secondary"
                           sx={{ whiteSpace: "normal" }}
                         >
@@ -980,19 +929,19 @@ const Dashboard = () => {
         {/* ================= Footer ================= */}
         <Box
           px={3}
-          py={2}
+          py={1.5}                   // slightly smaller vertical padding
           display="flex"
           justifyContent="space-between"
           alignItems="center"
           borderTop="1px solid #E5E7EB"
         >
           {/* LEFT SIDE */}
-          <Typography fontSize={13} color="text.secondary">
+          <Typography fontSize={12} color="text.secondary">
             {filteredRows.length} record(s)
           </Typography>
 
           {/* RIGHT SIDE – ALL BUTTONS */}
-          <Box display="flex" gap={2} alignItems="center">
+          <Box display="flex" gap={1} alignItems="center">  {/* smaller gap between buttons */}
 
             {/* Bulk Approve */}
             {filteredRows.length > 0 &&
@@ -1004,19 +953,11 @@ const Dashboard = () => {
                     borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 600,
-                    px: 3.5,
+                    height: 28,        // 🔹 smaller height
+                    px: 2,             // 🔹 smaller padding
+                    fontSize: 11,      // 🔹 smaller text
                     backgroundColor: "#005eb8",
-                    transition: "all 0.25s ease",
-                    "&:hover": {
-                      backgroundColor: "#005eb8",
-                      opacity: 0.9,
-                      boxShadow: "0 2px 6px rgba(0, 94, 184, 0.25)",
-                    },
-                    "&:active": {
-                      backgroundColor: "#005eb8",
-                      opacity: 0.95,
-                      boxShadow: "0 3px 8px rgba(0, 94, 184, 0.3)",
-                    },
+                    "&:hover": { opacity: 0.9 },
                   }}
                   onClick={handleBulkApprove}
                 >
@@ -1032,32 +973,33 @@ const Dashboard = () => {
                   borderRadius: 999,
                   textTransform: "none",
                   fontWeight: 600,
-                  px: 3.5,
+                  height: 28,
+                  px: 2,
+                  fontSize: 11,
                   backgroundColor: "#005eb8",
-                  "&:hover": {
-                    backgroundColor: "#005eb8",
-                    opacity: 0.9,
-                  },
+                  "&:hover": { opacity: 0.9 },
                 }}
                 onClick={handlePostOrders}
               >
                 Post to ACCPAC
               </Button>
             )}
-            {/* Export CSV – Always Visible */}
+
+            {/* Export CSV */}
             <Button
               variant="outlined"
               sx={{
                 borderRadius: 999,
                 textTransform: "none",
                 fontWeight: 600,
-                px: 3.5,
+                height: 28,
+                px: 2,
+                fontSize: 11,
               }}
               onClick={handleExportCSV}
             >
               Export CSV
             </Button>
-
           </Box>
         </Box>
 

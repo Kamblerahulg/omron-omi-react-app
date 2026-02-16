@@ -855,8 +855,8 @@ export default function OMI() {
         sx={{
           mb: 0.5,
           mt: 0.5,
-          px: 2,
-          py: 2,
+          px: 1.5,         // slightly smaller padding
+          py: 1.5,
           borderRadius: 2,
           background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
         }}
@@ -866,7 +866,7 @@ export default function OMI() {
             display: "grid",
             gridTemplateColumns: "repeat(8, 1fr)", // 7 fields + chip
             alignItems: "center",
-            gap: 2,
+            gap: 1.5,    // smaller gap
           }}
         >
           {[
@@ -883,20 +883,23 @@ export default function OMI() {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                minWidth: 0, // IMPORTANT (prevents overflow)
+                minWidth: 0,
+                pr: index < 6 ? 2 : 0,      // spacing before divider
+                borderRight: index < 6 ? "1px solid #E5E7EB" : "none", // vertical divider except last
               }}
             >
               <Typography
-                fontSize={10}
+                fontSize={9}                 // 🔹 smaller font
                 color="text.secondary"
                 noWrap
+                sx={{ mb: 0.25 }}           // tighter spacing
               >
                 {item.label}
               </Typography>
 
               <Typography
                 fontWeight={600}
-                fontSize={13}
+                fontSize={11}               // 🔹 smaller value text
                 noWrap
               >
                 {item.value}
@@ -915,7 +918,7 @@ export default function OMI() {
                     ? "error"
                     : "warning"
               }
-              sx={{ fontWeight: 600 }}
+              sx={{ fontWeight: 600, fontSize: 10, height: 22 }} // smaller chip
             />
           </Box>
         </Box>
@@ -933,7 +936,7 @@ export default function OMI() {
         {/* -------- PDF Preview -------- */}
         <Paper
           sx={{
-            flex: pdfCollapsed ? "0 0 64px" : 1,
+            flex: pdfCollapsed ? "0 0 50px" : 1,
             height: "100%",
             transition: "all 0.35s ease",
             overflow: pdfCollapsed ? "hidden" : "hidden",
@@ -1185,12 +1188,12 @@ export default function OMI() {
           alignItems: "center",
           justifyContent: "space-between",
           backgroundColor: "#f3f4f6",
-          position: "relative",   // ✅ NOT absolute or fixed
+          position: "relative",
         }}
       >
         {/* LEFT SIDE – Remark */}
         <Typography
-          fontSize={12}   // 🔥 reduced from 13
+          fontSize={12} // 🔹 smaller text
           color="text.primary"
           sx={{ flex: 1 }}
         >
@@ -1198,30 +1201,49 @@ export default function OMI() {
         </Typography>
 
         {/* RIGHT SIDE – Actions */}
-        <Box display="flex" gap={1}>
+        <Box display="flex" gap={1} alignItems="center"> {/* 🔹 smaller gap */}
+
+          {/* Back Button */}
           <Button
             variant="outlined"
-            size="small"
             sx={{
-              fontSize: 12,
-              py: 0.5,
-              px: 1.5,
-              minHeight: 30,
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 600,
+              height: 28,     // 🔹 smaller height
+              px: 2,          // 🔹 smaller horizontal padding
+              fontSize: 11,   // 🔹 smaller font
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.04)",
+              },
+              "&:active": {
+                opacity: 0.9,
+              },
             }}
             onClick={() => navigate("/")}
           >
             Back
           </Button>
 
+          {/* Reject Button */}
           <Button
             variant="contained"
-            color="error"
-            size="small"
             sx={{
-              fontSize: 12,
-              py: 0.5,
-              px: 1.5,
-              minHeight: 30,
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 600,
+              height: 28,
+              px: 2,
+              fontSize: 11,
+              backgroundColor: "#d14343",
+              "&:hover": {
+                backgroundColor: "#d14343",
+                opacity: 0.9,
+              },
+              "&:active": {
+                backgroundColor: "#d14343",
+                opacity: 0.95,
+              },
             }}
             disabled={
               status === "Rejected" ||
@@ -1233,15 +1255,27 @@ export default function OMI() {
             Reject
           </Button>
 
+          {/* Approve Button */}
           <Button
             variant="contained"
-            size="small"
             sx={{
-              fontSize: 12,
-              py: 0.5,
-              px: 1.5,
-              minHeight: 30,
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 600,
+              height: 28,
+              px: 2,
+              fontSize: 11,
               backgroundColor: "#005eb8",
+              "&:hover": {
+                backgroundColor: "#005eb8",
+                opacity: 0.9,
+                boxShadow: "0 2px 6px rgba(0, 94, 184, 0.25)",
+              },
+              "&:active": {
+                backgroundColor: "#005eb8",
+                opacity: 0.95,
+                boxShadow: "0 3px 8px rgba(0, 94, 184, 0.3)",
+              },
             }}
             disabled={status !== "Pending Approval" || isSupplierMissing}
             onClick={() => {

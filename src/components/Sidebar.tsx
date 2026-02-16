@@ -21,10 +21,10 @@ import { Variants } from "framer-motion";
 const PRIMARY = "rgba(0, 94, 184)";
 
 const menuItems = [
-  { text: "OMI Dashboard", path: "/Dashboard", icon: <DashboardOutlinedIcon /> },
+  { text: "OMI Dashboard", path: "/Dashboard", icon: <DashboardOutlinedIcon sx={{ fontSize: 20 }} /> },
   {
     text: "Configuration",
-    icon: <SettingsOutlinedIcon />,
+    icon: <SettingsOutlinedIcon sx={{ fontSize: 20 }} />,
     children: [
       { text: "Users", path: "/accountsettings/user-option" },
       { text: "User Mapping", path: "/accountsettings/user-mapping" },
@@ -64,7 +64,7 @@ const Sidebar = ({
   return (
     <Box
       sx={{
-        width: collapsed ? 72 : 230,
+        width: collapsed ? 60 : 200,           // 🔹 reduced width
         transition: "width 0.3s ease",
         minHeight: "100vh",
         background: "linear-gradient(180deg, #005EB8, #004a94)",
@@ -77,19 +77,17 @@ const Sidebar = ({
         overflowX: "hidden",
       }}
     >
-      {/* Toggle Button */}
-      {/* Top Section (Logo + Toggle) */}
+      {/* Toggle & Logo */}
       <Box
         sx={{
           display: "flex",
           flexDirection: collapsed ? "column" : "row",
           alignItems: "center",
           justifyContent: collapsed ? "center" : "space-between",
-          mb: 3,
+          mb: 2,
           gap: collapsed ? 1 : 0,
         }}
       >
-        {/* Logo */}
         <Box
           component="img"
           src={
@@ -99,37 +97,28 @@ const Sidebar = ({
           }
           alt="Omron"
           sx={{
-            height: collapsed ? 38 : 42,
-            width: collapsed ? 38 : "auto",
+            height: collapsed ? 32 : 36,      // 🔹 smaller logo
+            width: collapsed ? 32 : "auto",
             transition: "all 0.3s ease",
             objectFit: "contain",
           }}
         />
-
-        {/* Toggle Button */}
         <IconButton
           onClick={() => setCollapsed(!collapsed)}
           sx={{
             color: "#fff",
             background: "rgba(255,255,255,0.15)",
-            width: 34,
-            height: 34,
-            "&:hover": {
-              background: "rgba(255,255,255,0.25)",
-            },
+            width: 28,                     // 🔹 smaller toggle
+            height: 28,
+            "&:hover": { background: "rgba(255,255,255,0.25)" },
             transition: "all 0.3s ease",
           }}
         >
-          {collapsed ? (
-            <MenuIcon fontSize="small" />
-          ) : (
-            <MenuOpenIcon fontSize="small" />
-          )}
+          {collapsed ? <MenuIcon fontSize="small" /> : <MenuOpenIcon fontSize="small" />}
         </IconButton>
       </Box>
 
-
-      <Divider sx={{ mb: 3, borderColor: "rgba(255,255,255,0.25)" }} />
+      <Divider sx={{ mb: 2, borderColor: "rgba(255,255,255,0.25)" }} />
 
       <List>
         {menuItems.map((item) => {
@@ -138,41 +127,30 @@ const Sidebar = ({
           const parentActive = isParentActive(item);
 
           return (
-            <Box key={item.text} mb={1}>
-              <Tooltip
-                title={collapsed ? item.text : ""}
-                placement="right"
-                arrow
-              >
+            <Box key={item.text} mb={0.5}>
+              <Tooltip title={collapsed ? item.text : ""} placement="right" arrow>
                 <ListItemButton
                   component={!hasChildren ? NavLink : "div"}
                   to={!hasChildren ? item.path : undefined}
-                  onClick={
-                    hasChildren
-                      ? () => setOpenConfig(!openConfig)
-                      : undefined
-                  }
+                  onClick={hasChildren ? () => setOpenConfig(!openConfig) : undefined}
                   sx={{
-                    borderRadius: "16px",
-                    mb: 1,
-                    py: 1.5,
+                    borderRadius: "12px",
+                    mb: 0.5,
+                    py: 0.8,                   // 🔹 smaller vertical padding
                     justifyContent: collapsed ? "center" : "flex-start",
-                    px: collapsed ? 1.5 : 2.5,
-                    background:
-                      isActive || parentActive
-                        ? "linear-gradient(90deg, #ffffff 0%, #eef5ff 100%)"
-                        : "transparent",
-                    color:
-                      isActive || parentActive
-                        ? PRIMARY
-                        : "rgba(255,255,255,0.95)",
+                    px: collapsed ? 1 : 2,
+                    background: isActive || parentActive
+                      ? "linear-gradient(90deg, #ffffff 0%, #eef5ff 100%)"
+                      : "transparent",
+                    color: isActive || parentActive ? PRIMARY : "rgba(255,255,255,0.95)",
+                    fontSize: 12,               // 🔹 smaller font
                   }}
                 >
                   <ListItemIcon
                     sx={{
-                      color:
-                        isActive || parentActive ? PRIMARY : "#fff",
-                      minWidth: collapsed ? 0 : 40,
+                      color: isActive || parentActive ? PRIMARY : "#fff",
+                      minWidth: collapsed ? 0 : 36,  // 🔹 smaller icon space
+                      fontSize: 18,                   // 🔹 smaller icon
                     }}
                   >
                     {item.icon}
@@ -182,8 +160,8 @@ const Sidebar = ({
                     <ListItemText
                       primary={item.text}
                       primaryTypographyProps={{
-                        fontSize: 15,
-                        fontWeight: 700,
+                        fontSize: 12,  // 🔹 smaller text
+                        fontWeight: 500,
                       }}
                     />
                   )}
@@ -191,10 +169,9 @@ const Sidebar = ({
                   {hasChildren && !collapsed && (
                     <ExpandMoreIcon
                       sx={{
-                        transform: openConfig
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
+                        transform: openConfig ? "rotate(180deg)" : "rotate(0deg)",
                         transition: "0.3s",
+                        fontSize: 16,   // 🔹 smaller arrow
                       }}
                     />
                   )}
@@ -205,17 +182,10 @@ const Sidebar = ({
               {hasChildren && !collapsed && (
                 <AnimatePresence>
                   {openConfig && (
-                    <motion.div
-                      variants={submenuVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                    >
-                      <List sx={{ pl: 4 }}>
+                    <motion.div variants={submenuVariants} initial="hidden" animate="visible" exit="exit">
+                      <List sx={{ pl: 3 }}>
                         {item.children.map((child) => {
-                          const childActive =
-                            location.pathname === child.path;
-
+                          const childActive = location.pathname === child.path;
                           return (
                             <ListItemButton
                               key={child.text}
@@ -223,19 +193,17 @@ const Sidebar = ({
                               to={child.path}
                               sx={{
                                 borderRadius: "12px",
-                                mb: 0.5,
-                                py: 1.2,
-                                background: childActive
-                                  ? "rgba(255,255,255,0.28)"
-                                  : "transparent",
+                                mb: 0.25,
+                                py: 0.6,                 // 🔹 smaller submenu padding
+                                background: childActive ? "rgba(255,255,255,0.28)" : "transparent",
                                 color: "#fff",
                               }}
                             >
                               <ListItemText
                                 primary={child.text}
                                 primaryTypographyProps={{
-                                  fontSize: 14,
-                                  fontWeight: childActive ? 700 : 600,
+                                  fontSize: 11,           // 🔹 smaller submenu text
+                                  fontWeight: childActive ? 500 : 400,
                                 }}
                               />
                             </ListItemButton>
@@ -251,19 +219,15 @@ const Sidebar = ({
         })}
       </List>
 
-      <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,.3)" }} />
+      <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,.3)" }} />
 
       {!collapsed && (
-        <Box
-          mt="auto"
-          textAlign="center"
-          fontSize={12}
-          color="rgba(255,255,255,.7)"
-        >
+        <Box mt="auto" textAlign="center" fontSize={10} color="rgba(255,255,255,.7)">
           v1.0.0
         </Box>
       )}
     </Box>
+
   );
 };
 
