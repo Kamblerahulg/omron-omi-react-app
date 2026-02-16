@@ -121,7 +121,7 @@ const Dashboard = () => {
   const modernField = {
     backgroundColor: "#FFFFFF",
     borderRadius: 2,
-    minWidth: 126,
+    minWidth: 100,
 
     "& .MuiOutlinedInput-root": {
       transition: "all 0.3s ease",
@@ -378,7 +378,7 @@ const Dashboard = () => {
           onChange={(e) => setEndDate(e.target.value)}
           sx={modernField}
         />
-        <FormControl size="small" sx={{ minWidth: 120 }}>
+        <FormControl size="small" sx={{ minWidth: 100 }}>
           <InputLabel id="bu-label">BU</InputLabel>
           <Select
             labelId="bu-label"
@@ -434,7 +434,7 @@ const Dashboard = () => {
               size="small"
               sx={{
                 ...modernField,
-                minWidth: 160,
+                minWidth: 100,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "8px",       // same as Select
                   '& fieldset': {
@@ -496,7 +496,7 @@ const Dashboard = () => {
         />
 
         {/* Status */}
-        <FormControl size="small" sx={{ minWidth: 160 }}>
+        <FormControl size="small" sx={{ minWidth: 100 }}>
           <InputLabel id="status-label">Status</InputLabel>
           <Select
             labelId="status-label"
@@ -514,7 +514,7 @@ const Dashboard = () => {
         </FormControl>
 
         {/* Reconciliation Status */}
-        <FormControl size="small" sx={{ minWidth: 155 }}>
+        <FormControl size="small" sx={{ minWidth: 100 }}>
           <InputLabel id="recon-label">Reconciliation Status</InputLabel>
           <Select
             labelId="recon-label"
@@ -532,7 +532,7 @@ const Dashboard = () => {
           </Select>
         </FormControl>
         {/* Invoice Type */}
-        <FormControl size="small" sx={{ minWidth: 135 }}>
+        <FormControl size="small" sx={{ minWidth: 100 }}>
           <InputLabel id="invtype-label">Invoice Type</InputLabel>
           <Select
             labelId="invtype-label"
@@ -556,7 +556,7 @@ const Dashboard = () => {
           label="Invoice Number"
           value={invoiceOrder}
           onChange={(e) => setInvoiceOrder(e.target.value)}
-          sx={{ ...modernField, minWidth: 140 }}
+          sx={{ ...modernField, minWidth: 100 }}
         />
         {/* BU Filter */}
 
@@ -580,25 +580,25 @@ const Dashboard = () => {
             overflowY: "auto",
           }}
         >
-          <Table stickyHeader>
+          <Table stickyHeader sx={{ tableLayout: "fixed", width: "100%" }}>
             <TableHead sx={{ backgroundColor: "#F9FAFB" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 160 }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
                   Processed Date
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 240 }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
                   Supplier Name
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 240 }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
                   BU
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 180 }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 14 }}>
                   Invoice No
                 </TableCell>
                 <TableCell
                   sx={{
                     fontWeight: 600,
-                    fontSize: 15,
+                    fontSize: 13,
                     width: 180,
                     textAlign: "center",
                   }}
@@ -608,17 +608,17 @@ const Dashboard = () => {
                 <TableCell
                   sx={{
                     fontWeight: 600,
-                    fontSize: 15,
+                    fontSize: 13,
                     width: 180,
                     textAlign: "center",
                   }}
                 >
                   Reconciliation Status
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 70 }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>
                   Review Data
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15, width: 120, textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: 13, textAlign: "center" }}>
                   More Details
                 </TableCell>
               </TableRow>
@@ -642,18 +642,18 @@ const Dashboard = () => {
                       },
                     }}
                   >
-                    <TableCell sx={{ fontSize: 15 }}>{row.invoiceDate}</TableCell>
+                    <TableCell sx={{ fontSize: 13 }}>{row.invoiceDate}</TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                      <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
                         {row.supplierName}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: 15}}>
+                      <Typography sx={{ fontSize: 13 }}>
                         {row.bu}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: 15 }}>{row.invoiceOrderNo}</TableCell>
+                    <TableCell sx={{ fontSize: 13 }}>{row.invoiceOrderNo}</TableCell>
 
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center">
@@ -661,8 +661,8 @@ const Dashboard = () => {
                           label={row.status}
                           size="small"
                           sx={{
-                            minWidth: 140,
-                            fontSize: 15,
+                            minWidth: 100,
+                            fontSize: 12,
                             fontWeight: 700,
                             borderRadius: 999,
                             background:
@@ -682,8 +682,8 @@ const Dashboard = () => {
                         label={row.reconciliationStatus}
                         size="small"
                         sx={{
-                          minWidth: 140,
-                          fontSize: 15,
+                          minWidth: 100,
+                          fontSize: 12,
                           fontWeight: 600,
                           borderRadius: 2,
                           backgroundColor:
@@ -703,8 +703,8 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell
                       sx={{
-                        minWidth: 140,
-                        fontSize: 15,
+                        minWidth: 100,
+                        fontSize: 13,
                         fontWeight: 600,
                         color: "#2F6FED",
                         cursor: "pointer",
@@ -740,7 +740,7 @@ const Dashboard = () => {
                               boxShadow: "0 20px 40px rgba(15,23,42,0.18)",
                               /* 🔥 KEY PART */
                               maxWidth: 480,          // ⬅️ wider tooltip
-                              minWidth: 370,          // ⬅️ consistent size
+                              minWidth: 100,          // ⬅️ consistent size
                             },
                           },
                           arrow: {
@@ -1044,7 +1044,7 @@ const Dashboard = () => {
                 Post to ACCPAC
               </Button>
             )}
-               {/* Export CSV – Always Visible */}
+            {/* Export CSV – Always Visible */}
             <Button
               variant="outlined"
               sx={{

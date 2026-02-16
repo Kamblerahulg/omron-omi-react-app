@@ -153,9 +153,8 @@ const invoiceDeliverySummary = {
 const SectionBody = ({ children }: { children: React.ReactNode }) => (
   <Box
     sx={{
-      minHeight: 200,      // instead of fixed height
       px: 2,
-      pt: 2,
+      pt: 0.5,
       pb: 1,
     }}
   >
@@ -176,7 +175,6 @@ const SectionTable = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-
 const ItemsTable = ({
   rows,
   view,
@@ -186,24 +184,40 @@ const ItemsTable = ({
   view: "INVOICE" | "DELIVERY";
   showFlag: boolean;
 }) => (
-  <Table size="small">
+  <Table
+    size="small"
+    sx={{
+      "& .MuiTableCell-root": {
+        fontSize: "12px",      // 🔥 smaller font
+        padding: "4px 8px",    // 🔥 reduce cell padding
+      },
+      "& .MuiTableHead-root .MuiTableCell-root": {
+        fontSize: "11.5px",    // 🔥 slightly smaller header
+        fontWeight: 600,
+        backgroundColor: "#F9FAFB",
+      },
+      "& .MuiTableRow-root": {
+        height: 30,            // 🔥 compact row height
+      },
+    }}
+  >
     <TableHead>
       <TableRow>
         {view === "INVOICE" ? (
           <>
-            <TableCell sx={{ width: "25%" }}>Invoice Item Code</TableCell>
-            <TableCell sx={{ width: "35%" }}>Invoice Item Name</TableCell>
-            <TableCell sx={{ width: "15%" }}>Invoice Item Qty</TableCell>
-            <TableCell sx={{ width: "25%" }} align="right">
+            <TableCell>Invoice Item Code</TableCell>
+            <TableCell>Invoice Item Name</TableCell>
+            <TableCell>Invoice Item Qty</TableCell>
+            <TableCell align="right">
               Invoice Item Total Price
             </TableCell>
           </>
         ) : (
           <>
-            <TableCell sx={{ width: "25%" }}>DO Item Code</TableCell>
-            <TableCell sx={{ width: "35%" }}>DO Item Name</TableCell>
-            <TableCell sx={{ width: "15%" }}>DO Item Unit Measurement</TableCell>
-            <TableCell sx={{ width: "25%" }}>DO Item Qty</TableCell>
+            <TableCell>DO Item Code</TableCell>
+            <TableCell>DO Item Name</TableCell>
+            <TableCell>DO Item Unit Measurement</TableCell>
+            <TableCell>DO Item Qty</TableCell>
           </>
         )}
       </TableRow>
@@ -246,7 +260,6 @@ const ItemsTable = ({
 );
 
 
-
 const SummaryHeaderAMMIC = ({
   data,
   view,
@@ -257,16 +270,25 @@ const SummaryHeaderAMMIC = ({
   if (view === "DELIVERY") {
     return (
       <Box>
-        <Typography fontSize={16} fontWeight={700} color="#0F172A" mb={1}>
+        <Typography
+          fontSize={13}
+          fontWeight={550}
+          color="#0F172A"
+          mt={0.5}
+          mb={0}
+          sx={{
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",   // spacing between text & line
+          }}
+        >
           Delivery Order
         </Typography>
-
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3}>
           <Box>
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.invoiceRef}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_dodInvRef ?? "-"}
             </Typography>
           </Box>
@@ -275,7 +297,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryInvoiceno}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_dodInvNo ?? "-"}
             </Typography>
           </Box>
@@ -284,7 +306,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryNoteRef}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_dodNoteReff ?? "-"}
             </Typography>
           </Box>
@@ -292,7 +314,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryNoteNumber}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_dodNoteNo ?? "-"}
             </Typography>
           </Box>
@@ -300,7 +322,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocDate}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_docDocDate ?? "-"}
             </Typography>
           </Box>
@@ -309,7 +331,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocType}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_docDocType ?? "-"}
             </Typography>
           </Box>
@@ -318,7 +340,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocNumber}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_docDocNo ?? "-"}
             </Typography>
           </Box>
@@ -327,7 +349,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryDate}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_dodDate ?? "-"}
             </Typography>
           </Box>
@@ -336,7 +358,7 @@ const SummaryHeaderAMMIC = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.totalQty}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.a_doTotQty ?? "-"}
             </Typography>
           </Box>
@@ -350,8 +372,8 @@ const SummaryHeaderAMMIC = ({
   return (
     <Box>
       <Typography
-        fontSize={18}
-        fontWeight={700}
+        fontSize={13}
+        fontWeight={550}
         color="#0F172A"
       >
         {data.supplierName || "-"}
@@ -366,7 +388,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Date
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"}>
+          <Typography fontWeight={500} fontSize="12px">
             {data.a_invoiceDate || "-"}
           </Typography>
         </Box>
@@ -375,7 +397,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Total Price
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"}>
+          <Typography fontWeight={500} fontSize="12px">
             {data.a_invoicetotalprice ?? "-"}
           </Typography>
         </Box>
@@ -384,7 +406,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Number
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"} >
+          <Typography fontWeight={500} fontSize="12px" >
             {data.a_invoicetotalqty || "-"}
           </Typography>
         </Box>
@@ -392,7 +414,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Delivery Note Number
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"}>
+          <Typography fontWeight={500} fontSize="12px">
             {data.a_invoicedeliverynoteno || "-"}
           </Typography>
         </Box>
@@ -400,7 +422,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Total Quantity
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"}>
+          <Typography fontWeight={500} fontSize="12px">
             {data.a_invoicetotalqty || "-"}
           </Typography>
         </Box>
@@ -408,7 +430,7 @@ const SummaryHeaderAMMIC = ({
           <Typography fontSize={12} color="text.secondary">
             Invoice Reff.
           </Typography>
-          <Typography fontWeight={500} fontSize={"15px"}>
+          <Typography fontWeight={500} fontSize="12px">
             {data.a_invoiceReff || "-"}
           </Typography>
         </Box>
@@ -434,7 +456,17 @@ const SummaryHeaderInvoice = ({
   if (view === "DELIVERY") {
     return (
       <Box>
-        <Typography fontSize={16} fontWeight={700} color="#0F172A" mb={1}>
+        <Typography
+          fontSize={13}
+          fontWeight={550}
+          color="#0F172A"
+          mt={0.5}
+          mb={0}
+          sx={{
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",   // spacing between text & line
+          }}
+        >
           Delivery Order
         </Typography>
 
@@ -443,7 +475,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.invoiceRef}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_dodInvRef ?? "-"}
             </Typography>
           </Box>
@@ -452,7 +484,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryInvoiceno}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_dodInvNo ?? "-"}
             </Typography>
           </Box>
@@ -461,7 +493,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryNoteRef}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_dodNoteReff ?? "-"}
             </Typography>
           </Box>
@@ -469,7 +501,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryNoteNumber}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_dodNoteNo ?? "-"}
             </Typography>
           </Box>
@@ -477,7 +509,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocDate}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_docDocDate ?? "-"}
             </Typography>
           </Box>
@@ -486,7 +518,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocType}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_docDocType ?? "-"}
             </Typography>
           </Box>
@@ -495,7 +527,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.customDocNumber}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_docDocNo ?? "-"}
             </Typography>
           </Box>
@@ -504,7 +536,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.deliveryDate}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px" color={
+            <Typography fontWeight={500} fontSize="12px" color={
               flags?.ismatch_ideliverydate === "Y"
                 ? "success.main"
                 : flags?.ismatch_ideliverydate === "N"
@@ -520,7 +552,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               {DO_LABELS.totalQty}
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.i_doTotQty ?? "-"}
             </Typography>
           </Box>
@@ -533,7 +565,8 @@ const SummaryHeaderInvoice = ({
   // ✅ INVOICE VIEW (default)
   return (
     <Box>
-      <Typography fontSize={18} fontWeight={700} color="#0F172A">
+      <Typography fontSize={13}
+        fontWeight={550} color="#0F172A">
         {data.supplierName || "-"}
       </Typography>
 
@@ -544,7 +577,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               Invoice Date
             </Typography>
-            <Typography fontWeight={500} fontSize="15px" color={flags.ismatch_invdate === "Y" ? "success.main" : "error.main"}>
+            <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invdate === "Y" ? "success.main" : "error.main"}>
               {data.invoiceDate || "-"}
             </Typography>
           </Box>
@@ -556,7 +589,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               Invoice Total Price
             </Typography>
-            <Typography fontWeight={500} fontSize="15px" color={flags.ismatch_invtotalprice === "Y" ? "success.main" : "error.main"}>
+            <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invtotalprice === "Y" ? "success.main" : "error.main"}>
               {data.invoicetotalprice || "-"}
             </Typography>
           </Box>
@@ -566,7 +599,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               Invoice Number
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.invoiceReff || "-"}
             </Typography>
           </Box>
@@ -577,7 +610,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               Invoice Delivery Note Number
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.invoicedeliverynoteno || "-"}
             </Typography>
           </Box>
@@ -588,7 +621,7 @@ const SummaryHeaderInvoice = ({
             <Typography fontSize={12} color="text.secondary">
               Invoice Total Quantity
             </Typography>
-            <Typography fontWeight={500} fontSize="15px">
+            <Typography fontWeight={500} fontSize="12px">
               {data.invoicetotalqty || "-"}
             </Typography>
           </Box>
@@ -600,7 +633,7 @@ const SummaryHeaderInvoice = ({
             Invoice Reff.
           </Typography>
 
-          <Typography fontWeight={500} fontSize="15px" color={flags.ismatch_invreff === "Y" ? "success.main" : "error.main"}>
+          <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invreff === "Y" ? "success.main" : "error.main"}>
             {data.invoiceReff || "-"}
           </Typography>
         </Box>
@@ -610,70 +643,70 @@ const SummaryHeaderInvoice = ({
   );
 };
 
-const SectionHeaderWithToggle = ({
-  title,
-  value,
-  onChange,
-}: {
-  title: string;
-  value: "OMI" | "AMMIC";
-  onChange: (v: "OMI" | "AMMIC") => void;
-}) => (
-  <Box
-    px={2}
-    py={1.5}
-    display="flex"
-    alignItems="center"
-    justifyContent="space-between"
-  >
-    <Typography fontWeight={500} fontSize={"15px"}>{title}</Typography>
+// const SectionHeaderWithToggle = ({
+//   title,
+//   value,
+//   onChange,
+// }: {
+//   title: string;
+//   value: "OMI" | "AMMIC";
+//   onChange: (v: "OMI" | "AMMIC") => void;
+// }) => (
+//   <Box
+//     px={2}
+//     py={1.5}
+//     display="flex"
+//     alignItems="center"
+//     justifyContent="space-between"
+//   >
+//     <Typography  fontWeight={500} fontSize="12px">{title}</Typography>
 
-    <ToggleButtonGroup
-      size="small"
-      exclusive
-      value={value}
-      onChange={(_, v) => v && onChange(v)}
-      sx={{
-        height: 28,
-        "& .MuiToggleButton-root": {
-          px: 1.5,
-          fontSize: 12,
-          fontWeight: 600,
-          textTransform: "none",
-        },
-      }}
-    >
-      <ToggleButton value="OMI">OMI</ToggleButton>
-      <ToggleButton value="AMMIC">AMMIC</ToggleButton>
-    </ToggleButtonGroup>
-  </Box>
-);
+//     <ToggleButtonGroup
+//       size="small"
+//       exclusive
+//       value={value}
+//       onChange={(_, v) => v && onChange(v)}
+//       sx={{
+//         height: 28,
+//         "& .MuiToggleButton-root": {
+//           px: 1.5,
+//           fontSize: 12,
+//           fontWeight: 600,
+//           textTransform: "none",
+//         },
+//       }}
+//     >
+//       <ToggleButton value="OMI">OMI</ToggleButton>
+//       <ToggleButton value="AMMIC">AMMIC</ToggleButton>
+//     </ToggleButtonGroup>
+//   </Box>
+// );
 
-const DeliveryOrderHeader = ({ data }: { data: any }) => (
-  <Box
-    display="grid"
-    gridTemplateColumns="repeat(2, 1fr)"
-    gap={2}
-  >
-    <Box>
-      <Typography fontSize={12} color="text.secondary">
-        DO Date
-      </Typography>
-      <Typography fontWeight={500} fontSize={"15px"}>
-        {data.invoiceDate || "-"}
-      </Typography>
-    </Box>
+// const DeliveryOrderHeader = ({ data }: { data: any }) => (
+//   <Box
+//     display="grid"
+//     gridTemplateColumns="repeat(2, 1fr)"
+//     gap={2}
+//   >
+//     <Box>
+//       <Typography fontSize={12} color="text.secondary">
+//         DO Date
+//       </Typography>
+//       <Typography  fontWeight={500} fontSize="12px">
+//         {data.invoiceDate || "-"}
+//       </Typography>
+//     </Box>
 
-    <Box>
-      <Typography fontSize={12} color="text.secondary">
-        Item Count
-      </Typography>
-      <Typography fontWeight={500} fontSize={"15px"}>
-        {data.itemCount ?? "-"}
-      </Typography>
-    </Box>
-  </Box>
-);
+//     <Box>
+//       <Typography fontSize={12} color="text.secondary">
+//         Item Count
+//       </Typography>
+//       <Typography  fontWeight={500} fontSize="12px">
+//         {data.itemCount ?? "-"}
+//       </Typography>
+//     </Box>
+//   </Box>
+// );
 
 export default function OMI() {
   const [pdfType, setPdfType] = useState<"original" | "masked">("original");
@@ -806,120 +839,97 @@ export default function OMI() {
     ReconciliationTable as React.ComponentType<{ rows: RowType[] }>;
 
   /* ---------- COLUMN ---------- */
- 
-
   /* ================= UI ================= */
   return (
-    <Box width="100%">
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+
       {/* ===== HEADER ===== */}
       <Paper
         sx={{
-          mb: 2,
-          p: 2,
-          borderRadius: 3,
+          mb: 0.5,
+          mt: 0.5,
+          px: 2,
+          py: 2,
+          borderRadius: 2,
           background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
         }}
       >
-        <Stack direction="row" spacing={3} alignItems="center" flexWrap="wrap">
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Supplier Name
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {supplierName || "-"}
-            </Typography>
-          </Box>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(8, 1fr)", // 7 fields + chip
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          {[
+            { label: "Supplier Name", value: supplierName || "-" },
+            { label: "Invoice No.", value: invoiceOrderNo || "-" },
+            { label: "Reconciliation Status", value: reconciliationStatus || "-" },
+            { label: "Confidence", value: "0.97" },
+            { label: "Batch No.", value: a_BatchNo || "787346" },
+            { label: "Interface Remark", value: a_InterfaceRmk || "Quality Best" },
+            { label: "Duplicate", value: is_duplicate || "Y" },
+          ].map((item, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                minWidth: 0, // IMPORTANT (prevents overflow)
+              }}
+            >
+              <Typography
+                fontSize={10}
+                color="text.secondary"
+                noWrap
+              >
+                {item.label}
+              </Typography>
 
-          <Divider orientation="vertical" flexItem />
+              <Typography
+                fontWeight={600}
+                fontSize={13}
+                noWrap
+              >
+                {item.value}
+              </Typography>
+            </Box>
+          ))}
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice No.
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {invoiceOrderNo || "-"}
-            </Typography>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Chip
+              label={status}
+              size="small"
+              color={
+                status === "Approved" || status === "JDE-Success"
+                  ? "success"
+                  : status === "Rejected"
+                    ? "error"
+                    : "warning"
+              }
+              sx={{ fontWeight: 600 }}
+            />
           </Box>
-          <Divider orientation="vertical" flexItem />
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Reconciliation Status
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {reconciliationStatus || "-"}
-            </Typography>
-          </Box>
-          {/* 🔹 Vertical Divider */}
-          <Box
-            sx={{
-              width: "1px",
-              height: 36,
-              backgroundColor: "rgba(0,0,0,0.08)", // very faint
-            }}
-          />
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Overall Confidence Score
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {"0.97"}
-            </Typography>
-
-          </Box>
-          <Divider orientation="vertical" flexItem />
-
-          {/* ACCPAC Batch Number */}
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              ACCPAC Batch Number
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {a_BatchNo || "787346"}
-            </Typography>
-          </Box>
-          <Divider orientation="vertical" flexItem />
-          {/* ACCPAC Batch Number */}
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              ACCPAC Interface Remark
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {a_InterfaceRmk || "Quality Best"}
-            </Typography>
-          </Box>
-          <Divider orientation="vertical" flexItem />
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Is Duplicate
-            </Typography>
-            <Typography fontWeight={500} fontSize={"15px"}>
-              {is_duplicate || "Y"}
-            </Typography>
-          </Box>
-          <Divider orientation="vertical" flexItem />
-
-          <Chip
-            label={status}
-            color={
-              status === "Approved" || status === "JDE-Success"
-                ? "success"
-                : status === "Rejected"
-                  ? "error"
-                  : "warning"
-            }
-            sx={{ fontWeight: 600 }}
-          />
-
-        </Stack>
+        </Box>
       </Paper>
+
       <Box
-        display="flex"
-        gap={2}
-        width="100%"
-        height={pdfCollapsed ? "calc(100vh - 240px)" : "auto"}
-        alignItems="stretch"
+        sx={{
+          flex: 1,
+          display: "flex",
+          gap: 0.5, // 🔥 reduced from 2 → 1 (16px → 8px)
+          overflow: "hidden",
+        }}
       >
+
         {/* -------- PDF Preview -------- */}
         <Paper
           sx={{
@@ -927,7 +937,7 @@ export default function OMI() {
             height: "100%",
             transition: "all 0.35s ease",
             overflow: pdfCollapsed ? "hidden" : "hidden",
-            borderRadius: 3,
+            borderRadius: 2,
             display: "flex",
             flexDirection: "column",
           }}
@@ -935,66 +945,68 @@ export default function OMI() {
           {/* HEADER */}
           <Box
             px={1.5}
-            py={1}
+            py={0.75}
             display="flex"
             alignItems="center"
             justifyContent="space-between"
+            sx={{ height: 40 }}
           >
-            {/* LEFT SIDE */}
             {!pdfCollapsed && (
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <DescriptionIcon fontSize="small" />
+              <Stack direction="row" spacing={1} alignItems="center">
+                <DescriptionIcon sx={{ fontSize: 18 }} />
 
-                <Typography fontWeight={600} fontSize={14}>
-                  Invoice/Delivery Order PDF
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  Invoice / Delivery Order PDF
                 </Typography>
 
-                {/* Toggle inline with label */}
                 <ToggleButtonGroup
                   size="small"
                   exclusive
                   value={pdfType}
                   onChange={(_, value) => value && setPdfType(value)}
                   sx={{
-                    height: 28,
+                    height: 26,
                     "& .MuiToggleButton-root": {
-                      px: 1.2,
-                      fontSize: 12,
+                      px: 1,
+                      fontSize: 11,
                       fontWeight: 600,
+                      textTransform: "none",
                     },
                   }}
                 >
-                  <ToggleButton value="original">
-                    Original
-                  </ToggleButton>
-                  <ToggleButton value="masked">
-                    Masked
-                  </ToggleButton>
+                  <ToggleButton value="original">Original</ToggleButton>
+                  <ToggleButton value="masked">Masked</ToggleButton>
                 </ToggleButtonGroup>
               </Stack>
             )}
 
-            {/* RIGHT SIDE – Collapse */}
             <IconButton
               onClick={() => setPdfCollapsed(!pdfCollapsed)}
               sx={{
-                width: 34,
-                height: 34,
-                borderRadius: 2,
+                width: 30,
+                height: 30,
+                borderRadius: 1.5,
                 backgroundColor: "rgba(0, 94, 184)",
                 color: "#F1F5FF",
-                transition: "all 0.5s ease",
                 "&:hover": {
-                  backgroundColor: "#E0E7FF",
-                  transform: "rotate(180deg)",
+                  backgroundColor: "#1E40AF",
                 },
               }}
             >
-              {pdfCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+              {pdfCollapsed ? (
+                <ChevronRightIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <ChevronLeftIcon sx={{ fontSize: 18 }} />
+              )}
             </IconButton>
-
-
           </Box>
+
           <Divider />
           {/* PDF VIEW */}
           {!pdfCollapsed && (
@@ -1003,12 +1015,12 @@ export default function OMI() {
             </Box>
           )}
         </Paper>
-
         {/* -------- Table Data -------- */}
         <Paper
           sx={{
             flex: pdfCollapsed ? 1.7 : 1,
-            borderRadius: 3,
+            borderRadius: 2,
+            height: "100%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -1017,7 +1029,7 @@ export default function OMI() {
           {/* Header */}
           <Box
             sx={{
-              height: 64,                 // ✅ fixed height
+              height: 40,
               px: 2,
               display: "flex",
               alignItems: "center",
@@ -1025,7 +1037,15 @@ export default function OMI() {
             }}
           >
 
-            <Typography fontWeight={500} fontSize={"15px"}>Extracted Data</Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: 0.2,
+              }}
+            >
+              Extracted Data
+            </Typography>
 
             {false && (
               <ToggleButtonGroup
@@ -1086,8 +1106,8 @@ export default function OMI() {
         <Paper
           sx={{
             flex: pdfCollapsed ? 1.7 : 1,
-            //height: "calc(100vh - 240px)",
-            borderRadius: 3,
+            height: "100%",
+            borderRadius: 2,
             transition: "flex 0.35s ease",
             display: "flex",
             flexDirection: "column",
@@ -1097,14 +1117,22 @@ export default function OMI() {
           {/* Header */}
           <Box
             sx={{
-              height: 64,                 // ✅ fixed height
+              height: 40,
               px: 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
             }}
           >
-            <Typography fontWeight={500} fontSize={"15px"}>AMMIC Data</Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: 0.2,
+              }}
+            >
+              AMMIC Data
+            </Typography>
 
             <ToggleButtonGroup
               size="small"
@@ -1149,16 +1177,20 @@ export default function OMI() {
       </Box>
       {/* ===== FOOTER ===== */}
       <Box
-        px={2}
-        py={1}
-        display="flex"
-        alignItems="center"
-        border="1px solid #E5E7EB"
-        borderTop="none"
+        sx={{
+          borderTop: "1px solid #E5E7EB",
+          px: 2,
+          py: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          backgroundColor: "#f3f4f6",
+          position: "relative",   // ✅ NOT absolute or fixed
+        }}
       >
         {/* LEFT SIDE – Remark */}
         <Typography
-          fontSize={13}
+          fontSize={12}   // 🔥 reduced from 13
           color="text.primary"
           sx={{ flex: 1 }}
         >
@@ -1166,14 +1198,31 @@ export default function OMI() {
         </Typography>
 
         {/* RIGHT SIDE – Actions */}
-        <Box display="flex" gap={1.5}>
-          <Button variant="outlined" onClick={() => navigate("/")}>
+        <Box display="flex" gap={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{
+              fontSize: 12,
+              py: 0.5,
+              px: 1.5,
+              minHeight: 30,
+            }}
+            onClick={() => navigate("/")}
+          >
             Back
           </Button>
 
           <Button
             variant="contained"
             color="error"
+            size="small"
+            sx={{
+              fontSize: 12,
+              py: 0.5,
+              px: 1.5,
+              minHeight: 30,
+            }}
             disabled={
               status === "Rejected" ||
               status === "Approved" ||
@@ -1186,13 +1235,20 @@ export default function OMI() {
 
           <Button
             variant="contained"
+            size="small"
+            sx={{
+              fontSize: 12,
+              py: 0.5,
+              px: 1.5,
+              minHeight: 30,
+              backgroundColor: "#005eb8",
+            }}
             disabled={status !== "Pending Approval" || isSupplierMissing}
-            sx={{ backgroundColor: "#005eb8" }}
             onClick={() => {
               if (isReconciliationMatched) {
-                handleApprove(); // approve directly
+                handleApprove();
               } else {
-                setApproveOpen(true); // ask for remark
+                setApproveOpen(true);
               }
             }}
           >
