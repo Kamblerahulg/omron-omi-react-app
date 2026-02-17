@@ -16,18 +16,18 @@ import {
     DialogActions,
     TextField,
     TableContainer,
-    Chip,
     Select,
     MenuItem,
     FormControl,
     InputLabel,
+    Chip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
-import { DEFAULT_PROMPT } from "../config/prompts/defaultPrompts";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
+import { DEFAULT_PROMPT } from "../config/prompts/defaultPrompts";
 
 interface Supplier {
     id: string;
@@ -54,6 +54,7 @@ export default function SupplierManagement() {
             prompt: "Validate SO before ingestion",
         },
     ]);
+
     const emptyForm: Supplier = {
         id: "",
         name: "",
@@ -67,6 +68,49 @@ export default function SupplierManagement() {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<Supplier | null>(null);
     const [form, setForm] = useState<Supplier>(emptyForm);
+    const headerButton = {
+        borderRadius: 999,
+        textTransform: "none",
+        fontWeight: 600,
+        height: 32,
+        px: 3,
+        fontSize: 12,
+        backgroundColor: "#005EB8",
+        boxShadow: "0 4px 12px rgba(0,94,184,0.25)",
+        "&:hover": { opacity: 0.9 },
+    };
+    const chipStyle = (isYes: boolean) => ({
+        height: 20,
+        fontSize: 11,
+        fontWeight: 700,
+        borderRadius: 999,
+        background: isYes ? "#DCFCE7" : "#FEE2E2",
+        color: isYes ? "#166534" : "#991B1B",
+    });
+    const editBtn = {
+        textTransform: "none",
+        fontSize: 12,
+        height: 28,
+        minWidth: "auto",
+        px: 1.5,
+        borderRadius: 999,
+        fontWeight: 600,
+        color: "#2563EB",
+        backgroundColor: "#EFF6FF",
+        "&:hover": { backgroundColor: "#DBEAFE" },
+    };
+    const deactivateBtn = {
+        textTransform: "none",
+        fontSize: 12,
+        height: 28,
+        minWidth: "auto",
+        px: 1.5,
+        borderRadius: 999,
+        fontWeight: 600,
+        color: "#DC2626",
+        backgroundColor: "#FEF2F2",
+        "&:hover": { backgroundColor: "#FEE2E2" },
+    };
 
     const saveSupplier = () => {
         if (editing) {
@@ -84,83 +128,101 @@ export default function SupplierManagement() {
         setForm(emptyForm);
     };
 
-
     return (
         <Box>
-            <Typography fontSize={22} fontWeight={600} mb={1}>
-                Supplier Management
-            </Typography>
+            {/* ===== Header ===== */}
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={2}
+                mb={2}
+            >
+                <Typography fontSize={20} fontWeight={600}>
+                    Supplier Management
+                </Typography>
 
-            <Paper sx={{ borderRadius: 4, mt: 2 }}>
-                <Box px={3} py={1} display="flex" justifyContent="space-between">
-                    <Typography fontWeight={600}></Typography>
-                    <Button
-                        variant="contained"
-                        onClick={() => {
-                            setEditing(null);
-                            setForm({
-                                ...emptyForm,
-                                prompt: DEFAULT_PROMPT, // ✅ preload
-                            });
-                            setOpen(true);
+                <Button
+                    variant="contained"
+                    size="small"
+                    sx={headerButton}
+                    onClick={() => {
+                        setEditing(null);
+                        setForm({ ...emptyForm, prompt: DEFAULT_PROMPT });
+                        setOpen(true);
+                    }}
+                >
+                    + Add Supplier
+                </Button>
+            </Box>
+
+            {/* ===== Table ===== */}
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    border: "1px solid #E5E7EB",
+                    overflow: "hidden",
+                }}
+            >
+                <TableContainer sx={{ maxHeight: 420 }}>
+                    <Table
+                        stickyHeader
+                        size="small"
+                        sx={{
+                            tableLayout: "fixed",
+                            "& .MuiTableCell-root": {
+                                fontSize: 12,
+                                paddingTop: 1,
+                                paddingBottom: 1,
+                            },
                         }}
                     >
-                        Add Supplier
-                    </Button>
-
-                </Box>
-
-                <TableContainer>
-                    <Table sx={{ tableLayout: "fixed", width: "100%" }}>
-                        <colgroup>
-                            <col style={{ width: "16%" }} />  {/* Supplier */}
-                            <col style={{ width: "10%" }} />  {/* BU */}
-                            <col style={{ width: "12%" }} />  {/* File Type */}
-                            <col style={{ width: "12%" }} />  {/* Pre */}
-                            <col style={{ width: "12%" }} />  {/* PII */}
-                            <col style={{ width: "18%" }} />  {/* Prompt */}
-                            <col style={{ width: "20%" }} />  {/* Actions */}
-                        </colgroup>
-                        <TableHead>
+                        <TableHead
+                            sx={{
+                                "& .MuiTableCell-root": {
+                                    fontWeight: 700,
+                                    backgroundColor: "#F9FAFB",
+                                },
+                            }}
+                        >
                             <TableRow>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>Supplier</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>BU</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>File Type</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>Pre-Processing</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>PII Masking</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: 15, textAlign: "center" }}>
-                                    Prompt
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: 15,
-                                        whiteSpace: "nowrap",
-                                        paddingLeft: 0,
-                                        paddingRight: 0,
-                                    }}
-                                >
-                                    Actions
-                                </TableCell>
+                                <TableCell>Supplier</TableCell>
+                                <TableCell>BU</TableCell>
+                                <TableCell>File Type</TableCell>
+                                <TableCell align="center">Pre</TableCell>
+                                <TableCell align="center">PII</TableCell>
+                                <TableCell align="center">Prompt</TableCell>
+                                <TableCell align="center">Actions</TableCell>
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
                             {suppliers.map(c => (
                                 <TableRow key={c.id} hover>
-                                    <TableCell sx={{ fontSize: 15 }}>{c.name}</TableCell>
-                                    <TableCell sx={{ fontSize: 15 }}>{c.bu}</TableCell>
-                                    <TableCell sx={{ fontSize: 15 }}>
-                                        {c.fileType}
-                                    </TableCell>
-                                    <TableCell sx={{ fontSize: 15 }}>
-                                        {c.preProcessing}
+                                    <TableCell sx={{ fontWeight: 500 }}>
+                                        {c.name}
                                     </TableCell>
 
-                                    <TableCell sx={{ fontSize: 15 }}>
-                                        {c.piiMasking}
+                                    <TableCell>{c.bu}</TableCell>
+
+                                    <TableCell>{c.fileType}</TableCell>
+
+                                    <TableCell align="center">
+                                        <Chip
+                                            label={c.preProcessing}
+                                            size="small"
+                                            sx={chipStyle(c.preProcessing === "Y")}
+                                        />
                                     </TableCell>
+
+                                    <TableCell align="center">
+                                        <Chip
+                                            label={c.piiMasking}
+                                            size="small"
+                                            sx={chipStyle(c.piiMasking === "Y")}
+                                        />
+                                    </TableCell>
+
                                     <TableCell align="center">
                                         <Tooltip
                                             placement="left"
@@ -279,15 +341,16 @@ export default function SupplierManagement() {
                 open={open}
                 onClose={() => setOpen(false)}
                 fullWidth
-                maxWidth="lg" // ✅ BIG
+                maxWidth="md"   // 🔥 reduced from lg → md
                 PaperProps={{
                     sx: {
-                        height: "85vh",
+                        height: "70vh",   // 🔥 reduced from 85vh
                         borderRadius: 4,
                         boxShadow: "0 30px 80px rgba(15,23,42,0.25)",
                     },
                 }}
             >
+
                 <DialogTitle
                     sx={{
                         fontWeight: 700,
@@ -301,7 +364,6 @@ export default function SupplierManagement() {
                 >
                     {editing ? "Edit Supplier" : "Add Supplier"}
                 </DialogTitle>
-
 
                 <DialogContent>
                     <Stack spacing={2} mt={1}>
@@ -386,13 +448,13 @@ export default function SupplierManagement() {
                             multiline
                             value={form.prompt}
                             onChange={e => setForm({ ...form, prompt: e.target.value })}
-                            minRows={14}
-                            maxRows={18}
+                            minRows={8}      // 🔥 reduced from 14
+                            maxRows={12}     // 🔥 reduced from 18
                             fullWidth
                             sx={{
                                 "& .MuiInputBase-root": {
                                     fontFamily: "monospace",
-                                    fontSize: 15,
+                                    fontSize: 14,   // 🔥 slightly smaller
                                     lineHeight: 1.6,
                                     backgroundColor: "#fffbfb",
                                     borderRadius: 2,
@@ -405,7 +467,6 @@ export default function SupplierManagement() {
                                 },
                             }}
                         />
-
                     </Stack>
                 </DialogContent>
 
@@ -447,3 +508,4 @@ const actionStyle = (color: string) => ({
         backgroundColor: `${color}26`,
     },
 });
+

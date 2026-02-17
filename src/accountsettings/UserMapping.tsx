@@ -23,20 +23,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
 
 type RoleType = "SysAdmin" | "Reviewer" | "Approver" | "Viewer";
-type GroupType = "SG_CS" | "VN_CS" | "ID_CS";
-type EntityType = "Finance" | "HR" | "IT" | "Operations";
 
 const ROLES: RoleType[] = ["SysAdmin", "Reviewer", "Approver", "Viewer"];
-const GROUPS: GroupType[] = ["SG_CS", "VN_CS", "ID_CS"];
-const ENTITIES: EntityType[] = ["Finance", "HR", "IT", "Operations"];
 
 interface UserMapping {
   id: string;
   user: string;
   email: string;
   roles: RoleType[];
-  groups: GroupType[];
-  entity: EntityType | "";
 }
 
 export default function UserMapping() {
@@ -46,8 +40,6 @@ export default function UserMapping() {
       user: "Rahul Kamble",
       email: "rahul@company.com",
       roles: ["SysAdmin"],
-      groups: ["VN_CS", "ID_CS"],
-      entity: "Finance", // Added default entity
     },
   ]);
 
@@ -56,13 +48,47 @@ export default function UserMapping() {
     user: "",
     email: "",
     roles: [],
-    groups: [],
-    entity: "",
   };
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<UserMapping | null>(null);
   const [form, setForm] = useState<UserMapping>(emptyForm);
+  const dialogFieldStyle = {
+    "& .MuiInputLabel-root": {
+      fontSize: 11,
+    },
+    "& .MuiOutlinedInput-root": {
+      fontSize: 12,
+      height: 34,
+      backgroundColor: "#FFFFFF",
+      "& fieldset": {
+        borderColor: "#E5E7EB",
+      },
+    },
+    "& .MuiOutlinedInput-input": {
+      padding: "6px 10px",
+    },
+  };
+
+  const dialogPrimaryBtn = {
+    borderRadius: 999,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: 11,
+    height: 28,
+    px: 2,
+    backgroundColor: "#005EB8",
+    "&:hover": { opacity: 0.9 },
+  };
+
+  const dialogCancelBtn = {
+    borderRadius: 999,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: 11,
+    height: 28,
+    px: 2,
+  };
 
   const saveMapping = () => {
     if (editing) {
@@ -81,96 +107,166 @@ export default function UserMapping() {
   };
 
   return (
-    <Box>
-      <Typography fontSize={22} fontWeight={600} mb={1}>
-        User-Role Mapping
-      </Typography>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        overflowX: "hidden",
+      }}
+    >
 
-      <Paper sx={{ borderRadius: 4, mt: 2 }}>
-        <Box px={3} py={1} display="flex" justifyContent="space-between">
-          <Typography fontWeight={600}></Typography>
-          <Button variant="contained" onClick={() => setOpen(true)}>
-            Add Mapping
-          </Button>
-        </Box>
+      {/* ===== Header ===== */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+        mt={2}
+      >
+        <Typography fontSize={20} fontWeight={600}>
+          User-Role Mapping
+        </Typography>
 
-        <TableContainer sx={{ overflowX: "hidden" }}>
-          <Table sx={{ tableLayout: "fixed", width: "100%" }}>
-            <colgroup>
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "20%" }} />
-            </colgroup>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{
+            borderRadius: 999,
+            textTransform: "none",
+            fontWeight: 600,
+            height: 32,
+            px: 3,
+            fontSize: 12,
+            backgroundColor: "#005EB8",
+            boxShadow: "0 4px 12px rgba(0,94,184,0.25)",
+            "&:hover": { opacity: 0.9 },
+          }}
+          onClick={() => {
+            setEditing(null);
+            setForm(emptyForm);
+            setOpen(true);
+          }}
+        >
+          + Add Mapping
+        </Button>
+      </Box>
 
-            <TableHead>
+      {/* ===== Table ===== */}
+      <Paper
+        sx={{
+          borderRadius: 3,
+          border: "1px solid #E5E7EB",
+          overflow: "hidden",
+        }}
+      >
+        <TableContainer
+          sx={{
+            maxHeight: 420,
+            width: "100%",
+            overflowX: "hidden",
+          }}
+        >
+          <Table
+            stickyHeader
+            size="small"
+            sx={{
+              width: "100%",
+              tableLayout: "fixed",
+              "& .MuiTableCell-root": {
+                fontSize: 12,
+                paddingTop: 1,
+                paddingBottom: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              },
+            }}
+          >
+
+            <TableHead
+              sx={{
+                "& .MuiTableCell-root": {
+                  fontWeight: 700,
+                  fontSize: 12,
+                  backgroundColor: "#F9FAFB",
+                },
+              }}
+            >
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>User</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 15 }}>Roles</TableCell>
-                <TableCell
-                  align="center"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 15,
-                    whiteSpace: "nowrap",
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                  }}
-                >
+                <TableCell sx={{ width: "25%" }}>User</TableCell>
+                <TableCell sx={{ width: "35%" }}>Email</TableCell>
+                <TableCell sx={{ width: "20%" }}>Roles</TableCell>
+                <TableCell align="center" sx={{ width: "20%" }}>
                   Actions
                 </TableCell>
+
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {data.map(row => (
-                <TableRow key={row.id} hover>
-                  <TableCell sx={{ fontSize: 15 }}>{row.user}</TableCell>
+              {data.map((row) => (
+                <TableRow
+                  key={row.id}
+                  hover
+                  sx={{
+                    "&:hover": { backgroundColor: "#F8FAFF" },
+                  }}
+                >
+                  <TableCell sx={{ fontWeight: 500 }}>
+                    {row.user}
+                  </TableCell>
+
                   <TableCell>{row.email}</TableCell>
-                  <TableCell sx={{ fontSize: 15 }}>{row.roles.join(", ")}</TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      whiteSpace: "nowrap",
-                      paddingLeft: 0,
-                      paddingRight: 0,
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      justifyContent="center"
-                      alignItems="center"
-                      sx={{ minWidth: 140 }}
-                    >
-                      {/* Edit */}
-                      <Stack
-                        direction="row"
-                        spacing={0.8}
-                        alignItems="center"
-                        sx={actionStyle("#2563EB")}
+
+                  <TableCell>
+                    {row.roles.join(", ")}
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <Box display="flex" justifyContent="center" gap={1.5}>
+                      <Button
+                        size="small"
+                        startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+                        sx={{
+                          textTransform: "none",
+                          fontSize: 12,
+                          height: 28,
+                          minWidth: "auto",
+                          px: 1.5,
+                          borderRadius: 999,
+                          fontWeight: 600,
+                          color: "#2563EB",
+                          backgroundColor: "#EFF6FF",
+                          "&:hover": { backgroundColor: "#DBEAFE" },
+                        }}
                         onClick={() => {
                           setEditing(row);
                           setForm(row);
                           setOpen(true);
                         }}
                       >
-                        <EditIcon fontSize="small" />
-                        <Typography fontSize={15}>Edit</Typography>
-                      </Stack>
+                        Edit
+                      </Button>
 
-                      {/* Delete */}
-                      <Stack
-                        direction="row"
-                        spacing={0.8}
-                        alignItems="center"
-                        sx={actionStyle("#DC2626")}
+                      <Button
+                        size="small"
+                        startIcon={<BlockIcon sx={{ fontSize: 16 }} />}
+                        sx={{
+                          textTransform: "none",
+                          fontSize: 12,
+                          height: 28,
+                          minWidth: "auto",
+                          px: 1.5,
+                          borderRadius: 999,
+                          fontWeight: 600,
+                          color: "#DC2626",
+                          backgroundColor: "#FEF2F2",
+                          "&:hover": { backgroundColor: "#FEE2E2" },
+                        }}
                       >
-                        <BlockIcon fontSize="small" />
-                        <Typography fontSize={15}>Deactivate</Typography>
-                      </Stack>
-                    </Stack>
+                        Deactivate
+                      </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -179,39 +275,97 @@ export default function UserMapping() {
         </TableContainer>
       </Paper>
 
-      {/* Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>{editing ? "Edit User Mapping" : "Add User Mapping"}</DialogTitle>
+      {/* ===== Dialog ===== */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            background: "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
+            boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 600,
+            fontSize: 15,
+            borderBottom: "1px solid #E5E7EB",
+            background: "#FFFFFF",
+          }}
+        >
+          {editing ? "Edit User Mapping" : "Add User Mapping"}
+        </DialogTitle>
 
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
+        <DialogContent sx={{ pt: 2 }}>
+          <Stack spacing={2}>
             <TextField
+              size="small"
               label="User Name"
+              fullWidth
               value={form.user}
-              onChange={e => setForm({ ...form, user: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, user: e.target.value })
+              }
+              sx={dialogFieldStyle}
             />
 
             <TextField
+              size="small"
               label="Email"
+              fullWidth
               value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value })
+              }
+              sx={dialogFieldStyle}
             />
 
-            {/* Roles */}
             <Autocomplete
               multiple
               options={ROLES}
               value={form.roles}
-              onChange={(_, value) => setForm({ ...form, roles: value })}
-              renderInput={params => <TextField {...params} label="Roles" />}
+              onChange={(_, value) =>
+                setForm({ ...form, roles: value })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Roles"
+                  size="small"
+                  sx={dialogFieldStyle}
+                />
+              )}
             />
-         
           </Stack>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveMapping}>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid #E5E7EB",
+            background: "#FFFFFF",
+          }}
+        >
+          <Button
+            variant="outlined"
+            size="small"
+            sx={dialogCancelBtn}
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            size="small"
+            sx={dialogPrimaryBtn}
+            onClick={saveMapping}
+          >
             Save
           </Button>
         </DialogActions>
@@ -219,19 +373,3 @@ export default function UserMapping() {
     </Box>
   );
 }
-
-/* ===== Reusable Action Style ===== */
-const actionStyle = (color: string) => ({
-  px: 1,
-  py: 0.4,
-  borderRadius: 1.2,
-  cursor: "pointer",
-  color,
-  fontSize: 14,
-  backgroundColor: `${color}14`,
-  display: "flex",
-  alignItems: "center",
-  gap: 0.5,
-  "& svg": { fontSize: 18 },
-  "&:hover": { backgroundColor: `${color}26` },
-});
