@@ -40,6 +40,16 @@ const STATUS_OPTIONS = [
 ];
 
 const Dashboard = () => {
+
+  const token = localStorage.getItem("access_token");
+
+  // fetch("https://mzx9xifx1h.execute-api.ap-southeast-1.amazonaws.com/dev/file-log", {
+  //   headers: {
+  //     Authorization: `Bearer ${token}`,
+  //     "Content-Type": "application/json",
+  //   },
+  // });
+
   const navigate = useNavigate();
 
   // 🔹 Filters

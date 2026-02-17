@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
+import { useEffect } from "react";
 
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -11,9 +12,59 @@ import Role from "./accountsettings/Role";
 import Supplier from "./accountsettings/SupplierManagement";
 import LandingOMI from "./pages/LandingOMI";
 
-import theme from "./theme"; // 👈 your Shorai Sans theme
+import theme from "./theme";
+
+// 🔥 AUTH TOKEN API
+const AUTH_URL =
+  "https://mzx9xifx1h.execute-api.ap-southeast-1.amazonaws.com/dev/auth/token";
 
 function App() {
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const expiry = localStorage.getItem("token_expiry");
+
+        // If no token OR expired → fetch new
+        if (!expiry || Date.now() > Number(expiry)) {
+
+          const response = await fetch(AUTH_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              client_id: "myclientid",
+              client_secret: "mysecret",
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Token fetch failed");
+          }
+
+          const data = await response.json();
+
+          // Save token
+          localStorage.setItem("access_token", data.access_token);
+
+          // Save expiry (1 hour)
+          localStorage.setItem(
+            "token_expiry",
+            (Date.now() + 60 * 60 * 1000).toString()
+          );
+
+          console.log("Auth token initialized");
+        }
+
+      } catch (error) {
+        console.error("Auth error:", error);
+      }
+    };
+
+    fetchToken();
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -38,6 +89,5 @@ function App() {
     </ThemeProvider>
   );
 }
-
 
 export default App;

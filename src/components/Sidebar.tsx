@@ -21,7 +21,7 @@ import { Variants } from "framer-motion";
 const PRIMARY = "rgba(0, 94, 184)";
 
 const menuItems = [
-  { text: "OMI Dashboard", path: "/Dashboard", icon: <DashboardOutlinedIcon sx={{ fontSize: 20 }} /> },
+  { text: "OMI AFD DocuBot", path: "/Dashboard", icon: <DashboardOutlinedIcon sx={{ fontSize: 20 }} /> },
   {
     text: "Configuration",
     icon: <SettingsOutlinedIcon sx={{ fontSize: 20 }} />,
@@ -64,7 +64,7 @@ const Sidebar = ({
   return (
     <Box
       sx={{
-        width: collapsed ? 60 : 200,           // 🔹 reduced width
+        width: collapsed ? 60 : 220,           // 🔹 reduced width
         transition: "width 0.3s ease",
         minHeight: "100vh",
         background: "linear-gradient(180deg, #005EB8, #004a94)",
