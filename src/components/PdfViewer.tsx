@@ -36,51 +36,6 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ pdfUrl }) => {
 
   return (
     <Box>
-      {/* Controls */}
-      <Box display="flex" justifyContent="flex-end" gap={1} mb={1}>
-        <Button
-          size="small"
-          onClick={handleZoomOut}
-          startIcon={<ZoomOutIcon sx={{ fontSize: 16 }} />}
-          sx={{
-            fontSize: 11,
-            minHeight: 28,
-            px: 1.2,
-            textTransform: "none",
-          }}
-        >
-          Zoom Out
-        </Button>
-
-        <Button
-          size="small"
-          onClick={handleZoomIn}
-          startIcon={<ZoomInIcon sx={{ fontSize: 16 }} />}
-          sx={{
-            fontSize: 11,
-            minHeight: 28,
-            px: 1.2,
-            textTransform: "none",
-          }}
-        >
-          Zoom In
-        </Button>
-
-        <Button
-          size="small"
-          onClick={handleDownload}
-          startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
-          sx={{
-            fontSize: 11,
-            minHeight: 28,
-            px: 1.2,
-            textTransform: "none",
-          }}
-        >
-          Download
-        </Button>
-
-      </Box>
 
       {/* 🔥 Force Reload with key */}
       <iframe

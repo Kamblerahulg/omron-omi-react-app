@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { useEffect } from "react";
 
@@ -71,11 +71,14 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          {/* ===== No Layout ===== */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<LandingOMI />} />
+          {/* Default Redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* ===== With Sidebar Layout ===== */}
+          {/* No Layout */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/landing" element={<LandingOMI />} />
+
+          {/* With Layout */}
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/omi" element={<OMI />} />
@@ -85,6 +88,7 @@ function App() {
             <Route path="accountsettings/supplier" element={<Supplier />} />
           </Route>
         </Routes>
+
       </BrowserRouter>
     </ThemeProvider>
   );

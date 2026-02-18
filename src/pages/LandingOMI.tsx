@@ -67,7 +67,20 @@ const LandingOMI = () => {
   const [activeMenu, setActiveMenu] = useState(""); // no active child initially
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", background: "#F1F3F8" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        background: "#F1F3F8",
+
+        transform: "scale(0.70)",
+        transformOrigin: "top left",
+
+        width: "calc(100% / 0.70)",     // 👈 IMPORTANT
+        height: "calc(100vh / 0.70)",   // 👈 IMPORTANT
+      }}
+    >
+
       {/* ================= LEFT SIDEBAR ================= */}
       <Box
         sx={{
@@ -83,7 +96,7 @@ const LandingOMI = () => {
       >
         {/* Brand */}
         <Typography fontSize={18} fontWeight={700} mb={4} color="#FFFFFF">
-          OMI Home
+          OMI WorkSphere
         </Typography>
 
         {/* Configuration Parent */}

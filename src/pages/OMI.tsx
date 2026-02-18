@@ -156,11 +156,13 @@ const SectionBody = ({ children }: { children: React.ReactNode }) => (
       px: 2,
       pt: 0.5,
       pb: 1,
+      borderBottom: "1px solid #E5E7EB", // add bottom border
     }}
   >
     {children}
   </Box>
 );
+
 
 const SectionTable = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -926,10 +928,10 @@ export default function OMI() {
 
       <Box
         sx={{
-          flex: 1,
+          flex: 1,           // take remaining space
           display: "flex",
-          gap: 0.5, // 🔥 reduced from 2 → 1 (16px → 8px)
-          overflow: "hidden",
+          gap: 0.5,
+          overflow: "hidden", // scrollable inside tables/PDF
         }}
       >
 
@@ -1022,7 +1024,8 @@ export default function OMI() {
         <Paper
           sx={{
             flex: pdfCollapsed ? 1.7 : 1,
-            borderRadius: 2,
+            transition: "all 0.35s ease",
+            borderRadius: 3,
             height: "100%",
             display: "flex",
             flexDirection: "column",
@@ -1179,117 +1182,123 @@ export default function OMI() {
 
       </Box>
       {/* ===== FOOTER ===== */}
-      <Box
+      <Paper
+        elevation={1} // subtle shadow
         sx={{
-          borderTop: "1px solid #E5E7EB",
-          px: 2,
-          py: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          backgroundColor: "#f3f4f6",
-          position: "relative",
+          mt: 2,
+          borderRadius: 3,
+          bgcolor: "#f3f4f6", // use bgcolor instead of backgroundColor
+          overflow: "hidden",  // ensures children don’t exceed borders
+          flexShrink: 0,   // prevent shrinking
         }}
       >
-        {/* LEFT SIDE – Remark */}
-        <Typography
-          fontSize={12} // 🔹 smaller text
-          color="text.primary"
-          sx={{ flex: 1 }}
+        <Box
+          px={2.5}
+          py={1.5}
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
         >
-          Please provide a reason for rejection
-        </Typography>
-
-        {/* RIGHT SIDE – Actions */}
-        <Box display="flex" gap={1} alignItems="center"> {/* 🔹 smaller gap */}
-
-          {/* Back Button */}
-          <Button
-            variant="outlined"
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 600,
-              height: 28,     // 🔹 smaller height
-              px: 2,          // 🔹 smaller horizontal padding
-              fontSize: 11,   // 🔹 smaller font
-              "&:hover": {
-                backgroundColor: "rgba(0,0,0,0.04)",
-              },
-              "&:active": {
-                opacity: 0.9,
-              },
-            }}
-            onClick={() => navigate("/")}
+          {/* LEFT SIDE – Remark */}
+          <Typography
+            fontSize={12} // smaller text
+            color="text.primary"
+            sx={{ flex: 1 }}
           >
-            Back
-          </Button>
+            Please provide a reason for rejection
+          </Typography>
 
-          {/* Reject Button */}
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 600,
-              height: 28,
-              px: 2,
-              fontSize: 11,
-              backgroundColor: "#d14343",
-              "&:hover": {
-                backgroundColor: "#d14343",
-                opacity: 0.9,
-              },
-              "&:active": {
-                backgroundColor: "#d14343",
-                opacity: 0.95,
-              },
-            }}
-            disabled={
-              status === "Rejected" ||
-              status === "Approved" ||
-              isSupplierMissing
-            }
-            onClick={() => setRejectOpen(true)}
-          >
-            Reject
-          </Button>
+          {/* RIGHT SIDE – Actions */}
+          <Box display="flex" gap={1} alignItems="center">
+            {/* Back Button */}
+            <Button
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                height: 28,
+                px: 2,
+                fontSize: 11,
+                "&:hover": {
+                  backgroundColor: "rgba(0,0,0,0.04)",
+                },
+                "&:active": {
+                  opacity: 0.9,
+                },
+              }}
+              onClick={() => navigate("/Dashboard")}
+            >
+              Back
+            </Button>
 
-          {/* Approve Button */}
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 600,
-              height: 28,
-              px: 2,
-              fontSize: 11,
-              backgroundColor: "#005eb8",
-              "&:hover": {
-                backgroundColor: "#005eb8",
-                opacity: 0.9,
-                boxShadow: "0 2px 6px rgba(0, 94, 184, 0.25)",
-              },
-              "&:active": {
-                backgroundColor: "#005eb8",
-                opacity: 0.95,
-                boxShadow: "0 3px 8px rgba(0, 94, 184, 0.3)",
-              },
-            }}
-            disabled={status !== "Pending Approval" || isSupplierMissing}
-            onClick={() => {
-              if (isReconciliationMatched) {
-                handleApprove();
-              } else {
-                setApproveOpen(true);
+            {/* Reject Button */}
+            <Button
+              variant="contained"
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                height: 28,
+                px: 2,
+                fontSize: 11,
+                backgroundColor: "#d14343",
+                "&:hover": {
+                  backgroundColor: "#d14343",
+                  opacity: 0.9,
+                },
+                "&:active": {
+                  backgroundColor: "#d14343",
+                  opacity: 0.95,
+                },
+              }}
+              disabled={
+                status === "Rejected" ||
+                status === "Approved" ||
+                isSupplierMissing
               }
-            }}
-          >
-            Approve
-          </Button>
+              onClick={() => setRejectOpen(true)}
+            >
+              Reject
+            </Button>
+
+            {/* Approve Button */}
+            <Button
+              variant="contained"
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                height: 28,
+                px: 2,
+                fontSize: 11,
+                backgroundColor: "#005eb8",
+                "&:hover": {
+                  backgroundColor: "#005eb8",
+                  opacity: 0.9,
+                  boxShadow: "0 2px 6px rgba(0, 94, 184, 0.25)",
+                },
+                "&:active": {
+                  backgroundColor: "#005eb8",
+                  opacity: 0.95,
+                  boxShadow: "0 3px 8px rgba(0, 94, 184, 0.3)",
+                },
+              }}
+              disabled={status !== "Pending Approval" || isSupplierMissing}
+              onClick={() => {
+                if (isReconciliationMatched) {
+                  handleApprove();
+                } else {
+                  setApproveOpen(true);
+                }
+              }}
+            >
+              Approve
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </Paper>
+
 
       {/* ===== REJECT DIALOG ===== */}
       <Dialog

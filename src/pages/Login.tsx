@@ -58,7 +58,7 @@ const Login = () => {
         }
 
         // ⚠️ TEMP ONLY (remove once SSO-only)
-        navigate("/");
+        navigate("/landing");
     };
 
     /* ======================
@@ -82,7 +82,7 @@ const Login = () => {
             const data = await res.json();
             localStorage.setItem("app_token", data.jwt);
 
-            navigate("/");
+            navigate("/landing");
         } catch (error) {
             setErrorMsg("SSO login failed");
             setOpenError(true);
@@ -95,7 +95,12 @@ const Login = () => {
                 minHeight: "100vh",
                 background: "linear-gradient(180deg, #eef3fb 0%, #f8fbff 100%)",
                 display: "flex",
-                alignItems: "center",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                pt: 2,   // optional top spacing
+                // 👇 ADD THIS
+                transform: "scale(0.70)",   // 85% size (adjust if needed)
+                transformOrigin: "top center",
             }}
         >
             <Container maxWidth="sm">
