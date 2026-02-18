@@ -65,7 +65,7 @@ const normalizedAmmicInvoiceItems = ammicInvoiceItems.map(item => ({
 }));
 
 const invoiceSummary = {
-  supplierName: "Singapore NLB Pte.",
+  supplierName: "Automation Center Singapore POC Lab",
   invoiceDate: "21-Feb-2026",
   invoicetotalprice: "$ 31,600",
   invoicetotalqty: 65,
@@ -78,7 +78,7 @@ const invoiceSummary = {
 
 
 const ammicInvoiceSummary = {
-  supplierName: "OMRON Client Pte.",
+  supplierName: "Automation Center Singapore POC Lab",
   a_invoiceDate: "25-Jun-2026",
   a_invoicetotalprice: "$ 98,400",
   a_invoicetotalqty: 99,
