@@ -64,9 +64,14 @@ export default function UserOption() {
         justifyContent="space-between"
         alignItems="center"
         mb={2}
-        mt={2}
+        mt={0}
       >
-        <Typography fontSize={20} fontWeight={600}>
+        <Typography
+          fontFamily={`"Shorai Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`}
+          fontSize={18}
+          fontWeight={600}
+          mb={1}
+        >
           User Options
         </Typography>
 
@@ -97,56 +102,70 @@ export default function UserOption() {
       {/* ===== Table Card ===== */}
       <Paper
         sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
           borderRadius: 3,
           border: "1px solid #E5E7EB",
           overflow: "hidden",
         }}
       >
-        <TableContainer sx={{ maxHeight: 420 }}>
+        <TableContainer
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+          }}
+        >
           <Table
             stickyHeader
             size="small"
             sx={{
               width: "100%",
-              tableLayout: "fixed", // 🔥 FIXED ALIGNMENT
+              tableLayout: "auto", // ✅ auto fit like first table
               "& .MuiTableCell-root": {
-                fontSize: 12,
+                fontSize: 11,                 // 🔥 same as first table
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
                 paddingTop: 1,
                 paddingBottom: 1,
               },
             }}
           >
-            {/* ===== Header ===== */}
+            {/* ================= HEADER ================= */}
             <TableHead
               sx={{
                 "& .MuiTableCell-root": {
-                  fontWeight: 700,
+                  fontWeight: 600,            // 🔥 match first table
                   fontSize: 12,
                   backgroundColor: "#F9FAFB",
                 },
               }}
             >
               <TableRow>
-                <TableCell sx={{ width: "30%" }}>Name</TableCell>
-                <TableCell sx={{ width: "35%" }}>Email</TableCell>
-                <TableCell align="center" sx={{ width: "15%" }}>
+                <TableCell sx={{ width: 220 }}>Name</TableCell>
+                <TableCell sx={{ width: 260 }}>Email</TableCell>
+                <TableCell align="center" sx={{ width: 150 }}>
                   Status
                 </TableCell>
-                <TableCell align="center" sx={{ width: "20%" }}>
+                <TableCell align="center" sx={{ width: 220 }}>
                   Actions
                 </TableCell>
               </TableRow>
             </TableHead>
 
-            {/* ===== Body ===== */}
+            {/* ================= BODY ================= */}
             <TableBody>
               {users.map((u) => (
                 <TableRow
                   key={u.id}
                   hover
                   sx={{
+                    transition: "all 0.25s ease",
                     "&:hover": {
                       backgroundColor: "#F8FAFF",
+                      boxShadow:
+                        "inset 0 0 0 1px #E0E7FF, 0 4px 12px rgba(99,102,241,0.08)",
                     },
                   }}
                 >
@@ -161,40 +180,34 @@ export default function UserOption() {
                       label={u.status}
                       size="small"
                       sx={{
-                        height: 20,
-                        fontSize: 11,
+                        height: 18,             // 🔥 compact like first table
+                        fontSize: 10,
                         fontWeight: 700,
                         borderRadius: 999,
                         background:
                           u.status === "Active"
-                            ? "#DCFCE7"
+                            ? "linear-gradient(135deg,#34D399,#059669)"
                             : u.status === "Inactive"
-                              ? "#FEE2E2"
+                              ? "linear-gradient(135deg,#F87171,#DC2626)"
                               : u.status === "Suspended"
-                                ? "#FEF3C7"
-                                : "#DBEAFE",
-                        color:
-                          u.status === "Active"
-                            ? "#166534"
-                            : u.status === "Inactive"
-                              ? "#991B1B"
-                              : u.status === "Suspended"
-                                ? "#92400E"
-                                : "#1E40AF",
+                                ? "linear-gradient(135deg,#FBBF24,#D97706)"
+                                : "linear-gradient(135deg,#60A5FA,#2563EB)",
+                        color: "#fff",
+                        boxShadow: "0 6px 14px rgba(0,0,0,0.15)",
                       }}
                     />
                   </TableCell>
 
                   <TableCell align="center">
-                    <Box display="flex" justifyContent="center" gap={1.5}>
+                    <Box display="flex" justifyContent="center" gap={1}>
                       <Button
                         size="small"
-                        startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<EditIcon sx={{ fontSize: 14 }} />}
                         sx={{
                           textTransform: "none",
-                          fontSize: 12,
-                          height: 28,
-                          minWidth: 90,
+                          fontSize: 11,
+                          height: 26,
+                          minWidth: 80,
                           borderRadius: 999,
                           fontWeight: 600,
                           color: "#2563EB",
@@ -212,12 +225,12 @@ export default function UserOption() {
 
                       <Button
                         size="small"
-                        startIcon={<BlockIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<BlockIcon sx={{ fontSize: 14 }} />}
                         sx={{
                           textTransform: "none",
-                          fontSize: 12,
-                          height: 28,
-                          minWidth: 110,
+                          fontSize: 11,
+                          height: 26,
+                          minWidth: 95,
                           borderRadius: 999,
                           fontWeight: 600,
                           color: "#DC2626",
@@ -234,7 +247,22 @@ export default function UserOption() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* ================= FOOTER ================= */}
+        <Box
+          px={3}
+          py={1.5}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          borderTop="1px solid #E5E7EB"
+        >
+          <Typography fontSize={12} color="text.secondary">
+            {users.length} record(s)
+          </Typography>
+        </Box>
       </Paper>
+
 
       {/* Dialog */}
       <Dialog

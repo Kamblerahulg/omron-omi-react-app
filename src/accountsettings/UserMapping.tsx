@@ -121,9 +121,14 @@ export default function UserMapping() {
         justifyContent="space-between"
         alignItems="center"
         mb={2}
-        mt={2}
+        mt={0}
       >
-        <Typography fontSize={20} fontWeight={600}>
+        <Typography
+          fontFamily={`"Shorai Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`}
+          fontSize={18}
+          fontWeight={600}
+          mb={1}
+        >
           User-Role Mapping
         </Typography>
 
@@ -154,6 +159,9 @@ export default function UserMapping() {
       {/* ===== Table ===== */}
       <Paper
         sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
           borderRadius: 3,
           border: "1px solid #E5E7EB",
           overflow: "hidden",
@@ -161,9 +169,8 @@ export default function UserMapping() {
       >
         <TableContainer
           sx={{
-            maxHeight: 420,
-            width: "100%",
-            overflowX: "hidden",
+            flex: 1,
+            overflowY: "auto",
           }}
         >
           <Table
@@ -171,45 +178,50 @@ export default function UserMapping() {
             size="small"
             sx={{
               width: "100%",
-              tableLayout: "fixed",
+              tableLayout: "auto",
               "& .MuiTableCell-root": {
-                fontSize: 12,
-                paddingTop: 1,
-                paddingBottom: 1,
+                fontSize: 11,
+                whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                paddingTop: 1,
+                paddingBottom: 1,
               },
             }}
           >
-
+            {/* ================= HEADER ================= */}
             <TableHead
               sx={{
                 "& .MuiTableCell-root": {
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: 12,
                   backgroundColor: "#F9FAFB",
                 },
               }}
             >
               <TableRow>
-                <TableCell sx={{ width: "25%" }}>User</TableCell>
-                <TableCell sx={{ width: "35%" }}>Email</TableCell>
-                <TableCell sx={{ width: "20%" }}>Roles</TableCell>
-                <TableCell align="center" sx={{ width: "20%" }}>
+                <TableCell sx={{ width: 220 }}>User</TableCell>
+                <TableCell sx={{ width: 260 }}>Email</TableCell>
+                <TableCell sx={{ width: 220 }}>Roles</TableCell>
+                <TableCell align="center" sx={{ width: 200 }}>
                   Actions
                 </TableCell>
-
               </TableRow>
             </TableHead>
 
+            {/* ================= BODY ================= */}
             <TableBody>
               {data.map((row) => (
                 <TableRow
                   key={row.id}
                   hover
                   sx={{
-                    "&:hover": { backgroundColor: "#F8FAFF" },
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: "#F8FAFF",
+                      boxShadow:
+                        "inset 0 0 0 1px #E0E7FF, 0 4px 12px rgba(99,102,241,0.08)",
+                    },
                   }}
                 >
                   <TableCell sx={{ fontWeight: 500 }}>
@@ -218,21 +230,46 @@ export default function UserMapping() {
 
                   <TableCell>{row.email}</TableCell>
 
+                  {/* 🔥 Roles as gradient chips instead of plain text */}
                   <TableCell>
-                    {row.roles.join(", ")}
+                    <Box display="flex" gap={0.5} flexWrap="wrap">
+                      {row.roles.map((role) => (
+                        <Box
+                          key={role}
+                          sx={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            px: 1.2,
+                            py: 0.3,
+                            borderRadius: 999,
+                            color: "#fff",
+                            background:
+                              role === "SysAdmin"
+                                ? "linear-gradient(135deg,#7C3AED,#5B21B6)"
+                                : role === "Reviewer"
+                                  ? "linear-gradient(135deg,#60A5FA,#2563EB)"
+                                  : role === "Approver"
+                                    ? "linear-gradient(135deg,#34D399,#059669)"
+                                    : "linear-gradient(135deg,#FBBF24,#D97706)",
+                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                          }}
+                        >
+                          {role}
+                        </Box>
+                      ))}
+                    </Box>
                   </TableCell>
 
                   <TableCell align="center">
-                    <Box display="flex" justifyContent="center" gap={1.5}>
+                    <Box display="flex" justifyContent="center" gap={1}>
                       <Button
                         size="small"
-                        startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<EditIcon sx={{ fontSize: 14 }} />}
                         sx={{
                           textTransform: "none",
-                          fontSize: 12,
-                          height: 28,
-                          minWidth: "auto",
-                          px: 1.5,
+                          fontSize: 11,
+                          height: 26,
+                          minWidth: 80,
                           borderRadius: 999,
                           fontWeight: 600,
                           color: "#2563EB",
@@ -250,13 +287,12 @@ export default function UserMapping() {
 
                       <Button
                         size="small"
-                        startIcon={<BlockIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<BlockIcon sx={{ fontSize: 14 }} />}
                         sx={{
                           textTransform: "none",
-                          fontSize: 12,
-                          height: 28,
-                          minWidth: "auto",
-                          px: 1.5,
+                          fontSize: 11,
+                          height: 26,
+                          minWidth: 95,
                           borderRadius: 999,
                           fontWeight: 600,
                           color: "#DC2626",
@@ -273,6 +309,20 @@ export default function UserMapping() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* ================= FOOTER ================= */}
+        <Box
+          px={3}
+          py={1.5}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          borderTop="1px solid #E5E7EB"
+        >
+          <Typography fontSize={12} color="text.secondary">
+            {data.length} record(s)
+          </Typography>
+        </Box>
       </Paper>
 
       {/* ===== Dialog ===== */}

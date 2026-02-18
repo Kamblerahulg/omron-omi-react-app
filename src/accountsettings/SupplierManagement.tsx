@@ -136,7 +136,7 @@ export default function SupplierManagement() {
                 justifyContent="space-between"
                 alignItems="center"
                 mt={2}
-                mb={2}
+                mb={0}
             >
                 <Typography fontSize={20} fontWeight={600}>
                     Supplier Management
@@ -159,46 +159,80 @@ export default function SupplierManagement() {
             {/* ===== Table ===== */}
             <Paper
                 sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
                     borderRadius: 3,
                     border: "1px solid #E5E7EB",
                     overflow: "hidden",
                 }}
             >
-                <TableContainer sx={{ maxHeight: 420 }}>
+                <TableContainer
+                    sx={{
+                        flex: 1,
+                        overflowY: "auto",
+                    }}
+                >
                     <Table
                         stickyHeader
                         size="small"
                         sx={{
-                            tableLayout: "fixed",
+                            width: "100%",
+                            tableLayout: "auto",
                             "& .MuiTableCell-root": {
-                                fontSize: 12,
+                                fontSize: 11,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
                                 paddingTop: 1,
                                 paddingBottom: 1,
                             },
                         }}
                     >
+                        {/* ================= HEADER ================= */}
                         <TableHead
                             sx={{
                                 "& .MuiTableCell-root": {
-                                    fontWeight: 700,
+                                    fontWeight: 600,
+                                    fontSize: 12,
                                     backgroundColor: "#F9FAFB",
                                 },
                             }}
                         >
                             <TableRow>
-                                <TableCell>Supplier</TableCell>
-                                <TableCell>BU</TableCell>
-                                <TableCell>File Type</TableCell>
-                                <TableCell align="center">Pre</TableCell>
-                                <TableCell align="center">PII</TableCell>
-                                <TableCell align="center">Prompt</TableCell>
-                                <TableCell align="center">Actions</TableCell>
+                                <TableCell sx={{ width: 200 }}>Supplier</TableCell>
+                                <TableCell sx={{ width: 150 }}>BU</TableCell>
+                                <TableCell sx={{ width: 140 }}>File Type</TableCell>
+                                <TableCell align="center" sx={{ width: 160 }}>
+                                    Pre Processing
+                                </TableCell>
+                                <TableCell align="center" sx={{ width: 150 }}>
+                                    PII Masking
+                                </TableCell>
+                                <TableCell align="center" sx={{ width: 120 }}>
+                                    Prompt
+                                </TableCell>
+                                <TableCell align="center" sx={{ width: 200 }}>
+                                    Actions
+                                </TableCell>
                             </TableRow>
                         </TableHead>
 
+                        {/* ================= BODY ================= */}
                         <TableBody>
-                            {suppliers.map(c => (
-                                <TableRow key={c.id} hover>
+                            {suppliers.map((c) => (
+                                <TableRow
+                                    key={c.id}
+                                    hover
+                                    sx={{
+                                        transition: "all 0.25s ease",
+                                        "&:hover": {
+                                            backgroundColor: "#F8FAFF",
+                                            boxShadow:
+                                                "inset 0 0 0 1px #E0E7FF, 0 4px 12px rgba(99,102,241,0.08)",
+                                        },
+                                    }}
+                                >
                                     <TableCell sx={{ fontWeight: 500 }}>
                                         {c.name}
                                     </TableCell>
@@ -207,11 +241,23 @@ export default function SupplierManagement() {
 
                                     <TableCell>{c.fileType}</TableCell>
 
+                                    {/* 🔥 Gradient YES/NO Chips */}
                                     <TableCell align="center">
                                         <Chip
                                             label={c.preProcessing}
                                             size="small"
-                                            sx={chipStyle(c.preProcessing === "Y")}
+                                            sx={{
+                                                height: 18,
+                                                fontSize: 10,
+                                                fontWeight: 700,
+                                                borderRadius: 999,
+                                                background:
+                                                    c.preProcessing === "Y"
+                                                        ? "linear-gradient(135deg,#34D399,#059669)"
+                                                        : "linear-gradient(135deg,#F87171,#DC2626)",
+                                                color: "#fff",
+                                                boxShadow: "0 6px 14px rgba(0,0,0,0.15)",
+                                            }}
                                         />
                                     </TableCell>
 
@@ -219,58 +265,24 @@ export default function SupplierManagement() {
                                         <Chip
                                             label={c.piiMasking}
                                             size="small"
-                                            sx={chipStyle(c.piiMasking === "Y")}
+                                            sx={{
+                                                height: 18,
+                                                fontSize: 10,
+                                                fontWeight: 700,
+                                                borderRadius: 999,
+                                                background:
+                                                    c.piiMasking === "Y"
+                                                        ? "linear-gradient(135deg,#34D399,#059669)"
+                                                        : "linear-gradient(135deg,#F87171,#DC2626)",
+                                                color: "#fff",
+                                                boxShadow: "0 6px 14px rgba(0,0,0,0.15)",
+                                            }}
                                         />
                                     </TableCell>
 
+                                    {/* 🔥 Prompt Tooltip Icon */}
                                     <TableCell align="center">
-                                        <Tooltip
-                                            placement="left"
-                                            arrow
-                                            componentsProps={{
-                                                tooltip: {
-                                                    sx: {
-                                                        backgroundColor: "#FFFFFF",
-                                                        color: "#0F172A",
-                                                        borderRadius: 2,
-                                                        p: 2,
-                                                        boxShadow: "0 20px 40px rgba(15,23,42,0.18)",
-                                                        maxWidth: 520,
-                                                    },
-                                                },
-                                                arrow: {
-                                                    sx: { color: "#FFFFFF" },
-                                                },
-                                            }}
-                                            title={
-                                                <Box>
-                                                    <Typography
-                                                        fontSize={13}
-                                                        fontWeight={700}
-                                                        mb={1}
-                                                        color="#1E293B"
-                                                    >
-                                                        Prompt
-                                                    </Typography>
-
-                                                    <Box
-                                                        sx={{
-                                                            fontSize: 13,
-                                                            lineHeight: 1.6,
-                                                            fontFamily: "monospace",
-                                                            backgroundColor: "#F8FAFC",
-                                                            borderRadius: 1.5,
-                                                            p: 1.5,
-                                                            maxHeight: 260,
-                                                            overflowY: "auto",
-                                                            whiteSpace: "pre-wrap",
-                                                        }}
-                                                    >
-                                                        {c.prompt || "No prompt configured"}
-                                                    </Box>
-                                                </Box>
-                                            }
-                                        >
+                                        <Tooltip title="View Prompt" arrow>
                                             <IconButton
                                                 size="small"
                                                 sx={{
@@ -281,30 +293,28 @@ export default function SupplierManagement() {
                                                     },
                                                 }}
                                             >
-                                                <VisibilityIcon sx={{ color: "#4338CA" }} />
+                                                <VisibilityIcon sx={{ fontSize: 16, color: "#4338CA" }} />
                                             </IconButton>
                                         </Tooltip>
                                     </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{
-                                            whiteSpace: "nowrap",
-                                            paddingLeft: 0,
-                                            paddingRight: 0,
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            spacing={1.5}
-                                            justifyContent="center"
-                                            alignItems="center"
-                                            sx={{ minWidth: 140 }}   // 🔥 SAME AS USER MAPPING
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                spacing={0.8}
-                                                alignItems="center"
-                                                sx={actionStyle("#2563EB")}
+
+                                    {/* 🔥 Compact Action Buttons */}
+                                    <TableCell align="center">
+                                        <Box display="flex" justifyContent="center" gap={1}>
+                                            <Button
+                                                size="small"
+                                                startIcon={<EditIcon sx={{ fontSize: 14 }} />}
+                                                sx={{
+                                                    textTransform: "none",
+                                                    fontSize: 11,
+                                                    height: 26,
+                                                    minWidth: 80,
+                                                    borderRadius: 999,
+                                                    fontWeight: 600,
+                                                    color: "#2563EB",
+                                                    backgroundColor: "#EFF6FF",
+                                                    "&:hover": { backgroundColor: "#DBEAFE" },
+                                                }}
                                                 onClick={() => {
                                                     setEditing(c);
                                                     setForm({
@@ -314,26 +324,47 @@ export default function SupplierManagement() {
                                                     setOpen(true);
                                                 }}
                                             >
-                                                <EditIcon fontSize="small" />
-                                                <Typography fontSize={15}>Edit</Typography>
-                                            </Stack>
+                                                Edit
+                                            </Button>
 
-                                            <Stack
-                                                direction="row"
-                                                spacing={0.8}
-                                                alignItems="center"
-                                                sx={actionStyle("#DC2626")}
+                                            <Button
+                                                size="small"
+                                                startIcon={<BlockIcon sx={{ fontSize: 14 }} />}
+                                                sx={{
+                                                    textTransform: "none",
+                                                    fontSize: 11,
+                                                    height: 26,
+                                                    minWidth: 95,
+                                                    borderRadius: 999,
+                                                    fontWeight: 600,
+                                                    color: "#DC2626",
+                                                    backgroundColor: "#FEF2F2",
+                                                    "&:hover": { backgroundColor: "#FEE2E2" },
+                                                }}
                                             >
-                                                <BlockIcon fontSize="small" />
-                                                <Typography fontSize={15}>Deactivate</Typography>
-                                            </Stack>
-                                        </Stack>
+                                                Deactivate
+                                            </Button>
+                                        </Box>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                {/* ================= FOOTER ================= */}
+                <Box
+                    px={3}
+                    py={1.5}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    borderTop="1px solid #E5E7EB"
+                >
+                    <Typography fontSize={12} color="text.secondary">
+                        {suppliers.length} record(s)
+                    </Typography>
+                </Box>
             </Paper>
 
             {/* Dialog */}

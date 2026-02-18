@@ -285,7 +285,7 @@ const Dashboard = () => {
       "Supplier Name",
       "BU",
       "Invoice No",
-      "Invoice Dt.",
+      "Invoice Date",
       "Status",
       "Reconciliation Status",
     ];
@@ -553,7 +553,7 @@ const Dashboard = () => {
                 <TableCell sx={{ width: 200 }}>Supplier Name</TableCell>
                 <TableCell sx={{ width: 140 }}>BU</TableCell>
                 <TableCell sx={{ width: 130 }}>Invoice No.</TableCell>
-                <TableCell sx={{ width: 130 }}>Invoice Dt.</TableCell>
+                <TableCell sx={{ width: 130 }}>Invoice Date</TableCell>
 
                 {/* Keep these two CLOSE */}
                 <TableCell sx={{ width: 140, textAlign: "center" }}>
