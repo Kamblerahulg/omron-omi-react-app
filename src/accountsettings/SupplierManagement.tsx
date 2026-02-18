@@ -135,8 +135,8 @@ export default function SupplierManagement() {
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                mt={2}
-                mb={0}
+                mt={0}
+                mb={2}
             >
                 <Typography fontSize={20} fontWeight={600}>
                     Supplier Management
