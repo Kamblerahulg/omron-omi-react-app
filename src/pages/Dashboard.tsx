@@ -84,7 +84,8 @@ const Dashboard = () => {
         user: "System",
         remark: "Auto approved after reconciliation",
         DDateMatched: "11-04-2026",
-        invoicetype: "My Direct"
+        invoicetype: "My Direct",
+        isduplicate: "Y"
       },
     ],
     2: [
@@ -96,7 +97,8 @@ const Dashboard = () => {
         user: "Batch Job",
         remark: "Validation successful",
         DDateMatched: "11-04-2026",
-        invoicetype: "My Indirect"
+        invoicetype: "My Indirect",
+        isduplicate: "N"
       },
     ],
     3: [
@@ -108,7 +110,8 @@ const Dashboard = () => {
         user: "Supplier",
         remark: "Invoice uploaded",
         DDateMatched: "11-04-2026",
-        invoicetype: "My Indirect"
+        invoicetype: "My Indirect",
+        isduplicate: "Y"
       },
     ],
   };
@@ -163,7 +166,8 @@ const Dashboard = () => {
       user: "System",
       remark: "Auto approved after reconciliation",
       DDateMatched: "11-04-2026",
-      invoicetype: "My Direct"
+      invoicetype: "My Direct",
+      isduplicate: "Y"
     },
     {
       date: "25-01-2026",
@@ -173,7 +177,8 @@ const Dashboard = () => {
       user: "Batch Job",
       remark: "Validation successful",
       DDateMatched: "11-04-2026",
-      invoicetype: "My Indirect"
+      invoicetype: "My Indirect",
+      isduplicate: "Y"
     },
     {
       date: "24-01-2026",
@@ -183,17 +188,19 @@ const Dashboard = () => {
       user: "Supplier",
       remark: "Invoice uploaded",
       DDateMatched: "11-04-2026",
-      invoicetype: "My Indirect"
+      invoicetype: "My Indirect",
+      isduplicate: "N"
     },
   ];
 
   const rows = [
     {
       id: 1,
-      invoiceDate: "20-01-2026",
+      processedDate: "20-01-2026",
       supplierName: "Tata Motors",
       bu: "Singapore-OMI-ID45",
       invoiceOrderNo: "SO-1001",
+      invoiceDate: "14-05-2025",
       poNumber: "PO-9001",
       fileName: "ACTON_1",
       status: "Approved",
@@ -201,10 +208,11 @@ const Dashboard = () => {
     },
     {
       id: 2,
-      invoiceDate: "26-01-2026",
+      processedDate: "26-01-2026",
       supplierName: "Infosys",
       bu: "OMI-ID23",
       invoiceOrderNo: "SO-1002",
+      invoiceDate: "07-12-2025",
       poNumber: "PO-9002",
       fileName: "ACTON_1",
       status: "Pending Approval",
@@ -212,10 +220,11 @@ const Dashboard = () => {
     },
     {
       id: 3,
-      invoiceDate: "16-01-2026",
+      processedDate: "16-01-2026",
       supplierName: "Clou-Kinetics",
       bu: "OMI-ID",
       invoiceOrderNo: "SASFUO-9781002",
+      invoiceDate: "21-11-2025",
       poNumber: "PO-8352",
       fileName: "ACTON_1",
       status: "Pending Approval",
@@ -245,8 +254,8 @@ const Dashboard = () => {
         (!fileNameSearch ||
           r.fileName.toLowerCase().includes(fileNameSearch.toLowerCase())) &&
         (!bu || r.bu === bu) &&
-        (!startDate || toDate(r.invoiceDate) >= new Date(startDate)) &&
-        (!endDate || toDate(r.invoiceDate) <= new Date(endDate))
+        (!startDate || toDate(r.processedDate) >= new Date(startDate)) &&
+        (!endDate || toDate(r.processedDate) <= new Date(endDate))
       );
     });
   }, [
@@ -276,16 +285,18 @@ const Dashboard = () => {
       "Supplier Name",
       "BU",
       "Invoice No",
+      "Invoice Dt.",
       "Status",
       "Reconciliation Status",
     ];
 
     // Map rows to CSV format
     const csvRows = filteredRows.map((row) => [
-      row.invoiceDate,
+      row.processedDate,
       row.supplierName,
       row.bu,
       row.invoiceOrderNo,
+      row.invoiceDate,
       row.status,
       row.reconciliationStatus,
     ]);
@@ -541,7 +552,8 @@ const Dashboard = () => {
                 <TableCell sx={{ width: 110 }}>Processed Date</TableCell>
                 <TableCell sx={{ width: 200 }}>Supplier Name</TableCell>
                 <TableCell sx={{ width: 140 }}>BU</TableCell>
-                <TableCell sx={{ width: 130 }}>Invoice No</TableCell>
+                <TableCell sx={{ width: 130 }}>Invoice No.</TableCell>
+                <TableCell sx={{ width: 130 }}>Invoice Dt.</TableCell>
 
                 {/* Keep these two CLOSE */}
                 <TableCell sx={{ width: 140, textAlign: "center" }}>
@@ -580,7 +592,7 @@ const Dashboard = () => {
                       },
                     }}
                   >
-                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceDate}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{row.processedDate}</TableCell>
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",        // 🔥 single line
@@ -608,6 +620,7 @@ const Dashboard = () => {
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ fontSize: 12 }}>{row.invoiceOrderNo}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceDate}</TableCell>
 
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center">
@@ -779,6 +792,12 @@ const Dashboard = () => {
                                 </Typography>
                                 <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
                                   {latestRecord.invoicetype}
+                                </Typography>
+                                <Typography fontSize={11} color="text.secondary">
+                                  Is Duplicate
+                                </Typography>
+                                <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
+                                  {latestRecord.isduplicate}
                                 </Typography>
                               </Box>
                             </Box>
