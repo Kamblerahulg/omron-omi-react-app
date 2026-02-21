@@ -60,9 +60,8 @@ const Login = () => {
         try {
             // 🔥 Call backend login API
             const res = await generateToken();
-            localStorage.setItem("app_token", res.token);
-
             navigate("/landing-omi");
+            localStorage.setItem("app_token", res.token);
         } catch (error) {
             setErrorMsg("Login failed. Please try again.");
             setOpenError(true);
