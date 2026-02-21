@@ -147,7 +147,7 @@ const LandingOMI = () => {
               label="User Mapping"
               active={activeMenu === "User Mapping"}
               onClick={() => {
-                setActiveMenu("User Mapping");
+                setActiveMenu("User-Mapping");
                 navigate("/accountsettings/UserMapping");
               }}
               isChild

@@ -19,7 +19,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import MicrosoftIcon from "@mui/icons-material/DesktopWindows";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-
+import { generateToken } from "../api/api.auth";
 import { loginRequest } from "../auth/msalConfig"; // 👈 ADD
 
 const Login = () => {
@@ -38,7 +38,7 @@ const Login = () => {
     /* ======================
        NORMAL LOGIN (TEMP)
     ====================== */
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!email.trim()) {
             setErrorMsg("Email is mandatory");
             setOpenError(true);
@@ -57,10 +57,17 @@ const Login = () => {
             return;
         }
 
-        // ⚠️ TEMP ONLY (remove once SSO-only)
-        navigate("/landing");
-    };
+        try {
+            // 🔥 Call backend login API
+            const res = await generateToken();
+            localStorage.setItem("app_token", res.token);
 
+            navigate("/landing-omi");
+        } catch (error) {
+            setErrorMsg("Login failed. Please try again.");
+            setOpenError(true);
+        }
+    };
     /* ======================
        AZURE AD SSO LOGIN
     ====================== */
@@ -82,7 +89,7 @@ const Login = () => {
             const data = await res.json();
             localStorage.setItem("app_token", data.jwt);
 
-            navigate("/landing");
+            navigate("/landing-omi");
         } catch (error) {
             setErrorMsg("SSO login failed");
             setOpenError(true);

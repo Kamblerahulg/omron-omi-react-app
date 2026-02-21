@@ -2,18 +2,21 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { Box } from "@mui/material";
+import { useState } from "react";
 
 const MainLayout = () => {
+  const [collapsed, setCollapsed] = useState(false); // 🔥 ADD THIS
+
   return (
     <Box
       sx={{
         display: "flex",
         height: "100vh",
-        backgroundColor: "#F6F7FB", // modern light background
+        backgroundColor: "#F6F7FB",
       }}
     >
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Main Content */}
       <Box
@@ -26,7 +29,6 @@ const MainLayout = () => {
       >
         {/* Topbar */}
         <Topbar />
-
         {/* Page Content */}
         <Box
           sx={{

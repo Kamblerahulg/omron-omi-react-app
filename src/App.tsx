@@ -76,7 +76,7 @@ function App() {
 
           {/* No Layout */}
           <Route path="/login" element={<Login />} />
-          <Route path="/landing" element={<LandingOMI />} />
+          <Route path="/landing-omi" element={<LandingOMI />} />
 
           {/* With Layout */}
           <Route element={<Layout />}>

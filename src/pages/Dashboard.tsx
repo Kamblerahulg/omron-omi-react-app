@@ -32,11 +32,13 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const STATUS_OPTIONS = [
   "Pending Approval",
+  "Completed",
   "Approved",
-  "JDE-Success",
-  "JDE-Error",
-  "Duplicate",
-  "Reject",
+  "Rejected",
+  "Pending File",
+  "Pending AMMIC Data",
+  "Pending ACCPAC Posting",
+  "Failed ACCPAC"
 ];
 
 const Dashboard = () => {
@@ -53,8 +55,23 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   // 🔹 Filters
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const last30 = new Date();
+    last30.setDate(today.getDate() - 30);
+
+    const format = (d: Date) => d.toISOString().split("T")[0];
+
+    return {
+      start: format(last30),
+      end: format(today),
+    };
+  };
+
+  const { start, end } = getDefaultDateRange();
+
+  const [startDate, setStartDate] = useState(start);
+  const [endDate, setEndDate] = useState(end);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [supplierInput, setSupplierInput] = useState("");
   const [supplierOpen, setSupplierOpen] = useState(false);
@@ -66,9 +83,8 @@ const Dashboard = () => {
   const BU_OPTIONS = ["India", "Singapore", "Japan", "Malaysia"]; // map from API
   const RECON_STATUS_OPTIONS = [
     "Matched",
-    "Mismatch",
-    "Line Mismatch",
-    "Orphan Invoice",
+    "Not Matched",
+    "Duplicate Invoice"
   ];
   const INV_TYPE = [
     "Direct",
@@ -193,7 +209,7 @@ const Dashboard = () => {
     },
   ];
 
-  const rows = [
+  const [rows, setRows] = useState([
     {
       id: 1,
       processedDate: "20-01-2026",
@@ -216,7 +232,7 @@ const Dashboard = () => {
       poNumber: "PO-9002",
       fileName: "ACTON_1",
       status: "Pending Approval",
-      reconciliationStatus: "Mismatch",
+      reconciliationStatus: "Not Matched",
     },
     {
       id: 3,
@@ -230,7 +246,7 @@ const Dashboard = () => {
       status: "Pending Approval",
       reconciliationStatus: "Matched",
     },
-  ];
+  ]);
 
   const [fileNameSearch, setFileNameSearch] = useState("");
   // const [poSearch, setPoSearch] = useState("");
@@ -241,6 +257,7 @@ const Dashboard = () => {
   const supplierList = ["Tata Motors", "Infosys", "Reliance"]; // map from API
 
   // 🔹 Filter logic
+
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       return (
@@ -266,7 +283,10 @@ const Dashboard = () => {
     invoiceOrder,
     fileNameSearch,
     bu,
+    startDate,
+    endDate,
   ]);
+  const isTableEmpty = filteredRows.length === 0;
 
   const handlePostOrders = () => {
     const matchedRows = filteredRows.filter(
@@ -326,14 +346,23 @@ const Dashboard = () => {
     document.body.removeChild(link);
   };
 
-  const handleBulkApprove = () => {
-    const matchedRows = filteredRows.filter(
-      (row) => row.reconciliationStatus === "Matched"
-    );
+  const handleBulkApprove = async () => {
+    try {
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          filteredRows.some((f) => f.id === row.id)
+            ? { ...row, status: "Approved" }
+            : row
+        )
+      );
 
-    console.log("Posting Matched Orders:", matchedRows);
+      // 🔥 IMPORTANT: reset filter so updated rows remain visible
+      setStatus("Approved");
+
+    } catch (error) {
+      console.error(error);
+    }
   };
-
   return (
     <Box>
       <Box>
@@ -380,10 +409,10 @@ const Dashboard = () => {
         <TextField
           type="date"
           size="small"
-          label="Start Date"
+          label="End Date"
           InputLabelProps={{ shrink: true }}
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
           sx={compactFilter}
         />
         <FormControl size="small" sx={compactFilter}>
@@ -657,13 +686,13 @@ const Dashboard = () => {
                           backgroundColor:
                             row.reconciliationStatus === "Matched"
                               ? "#ECFDF5"
-                              : row.reconciliationStatus === "Mismatch"
+                              : row.reconciliationStatus === "Not Matched"
                                 ? "#FFF7ED"
                                 : "#FEF2F2",
                           color:
                             row.reconciliationStatus === "Matched"
                               ? "#047857"
-                              : row.reconciliationStatus === "Mismatch"
+                              : row.reconciliationStatus === "Not Matched"
                                 ? "#C2410C"
                                 : "#B91C1C",
                         }}
@@ -706,11 +735,19 @@ const Dashboard = () => {
                             sx: {
                               backgroundColor: "#FFFFFF",
                               color: "#0F172A",
-                              borderRadius: 2,
-                              p: 2,                     // slightly smaller padding
-                              boxShadow: "0 12px 24px rgba(15,23,42,0.15)", // lighter shadow
-                              maxWidth: 400,             // 🔹 narrower
-                              minWidth: 120,             // 🔹 consistent smaller size
+                              borderRadius: 3,
+                              px: 2,
+                              py: 1.5,
+                              boxShadow: "0 10px 30px rgba(15,23,42,0.12)",
+
+                              width: 320,          // ✅ fixed width
+                              maxWidth: 320,       // ✅ prevents stretching
+                              fontFamily: `"Shorai Sans", sans-serif`,
+
+                              "& .MuiTypography-root": {
+                                fontSize: 12,      // ✅ consistent font size
+                                lineHeight: 1.5,
+                              },
                             },
                           },
                           arrow: {
@@ -730,11 +767,7 @@ const Dashboard = () => {
                               </Typography>
 
                               <Box
-                                sx={{
-                                  height: 1,
-                                  backgroundColor: "#E5E7EB",
-                                  my: 1,              // slightly smaller spacing
-                                }}
+                                sx={{ height: 1.5, backgroundColor: "#E5E7EB", my: 1 }}
                               />
 
                               <Box
@@ -978,6 +1011,7 @@ const Dashboard = () => {
               status === "Pending Approval" && (
                 <Button
                   variant="contained"
+                  disabled={isTableEmpty}
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
@@ -998,6 +1032,7 @@ const Dashboard = () => {
             {filteredRows.length > 0 && status === "Approved" && (
               <Button
                 variant="contained"
+                disabled={isTableEmpty}
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
@@ -1016,6 +1051,7 @@ const Dashboard = () => {
 
             {/* Export CSV */}
             <Button
+              disabled={isTableEmpty}
               variant="outlined"
               sx={{
                 borderRadius: 999,
