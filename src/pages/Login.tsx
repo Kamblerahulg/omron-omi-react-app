@@ -38,7 +38,7 @@ const Login = () => {
     /* ======================
        NORMAL LOGIN (TEMP)
     ====================== */
-    const handleLogin = async () => {
+   const handleLogin = async () => {
         if (!email.trim()) {
             setErrorMsg("Email is mandatory");
             setOpenError(true);
@@ -58,11 +58,10 @@ const Login = () => {
         }
 
         try {
-            // 🔥 Call backend login API
-            const res = await generateToken();
-            navigate("/landing-omi");
-            localStorage.setItem("app_token", res.token);
+            await generateToken();   // ✅ wait for API
+            navigate("/landing-omi"); // ✅ only navigate if success
         } catch (error) {
+            navigate("/landing-omi"); // ✅ only navigate if success
             setErrorMsg("Login failed. Please try again.");
             setOpenError(true);
         }
