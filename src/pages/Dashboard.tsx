@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -25,12 +25,14 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { processingLogService } from "../services/processingLog.service";
 
 // ✅ Fonts: move to index.css or HTML
 // @import url('https://fonts.googleapis.com/css2?family=Shorai+Sans:wght@400;700&display=swap');
 
 
 const STATUS_OPTIONS = [
+  "NEW",
   "Pending Approval",
   "Completed",
   "Approved",
@@ -43,8 +45,8 @@ const STATUS_OPTIONS = [
 
 const Dashboard = () => {
 
-  const token = localStorage.getItem("access_token");
-
+  // const token = localStorage.getItem("access_token");
+  const [loading, setLoading] = useState(false);
   // fetch("https://mzx9xifx1h.execute-api.ap-southeast-1.amazonaws.com/dev/file-log", {
   //   headers: {
   //     Authorization: `Bearer ${token}`,
@@ -209,49 +211,17 @@ const Dashboard = () => {
     },
   ];
 
-  const [rows, setRows] = useState([
-    {
-      id: 1,
-      processedDate: "20-01-2026",
-      supplierName: "Tata Motors",
-      bu: "Singapore-OMI-ID45",
-      invoiceOrderNo: "SO-1001",
-      invoiceDate: "14-05-2025",
-      poNumber: "PO-9001",
-      fileName: "ACTON_1",
-      status: "Approved",
-      reconciliationStatus: "Matched",
-    },
-    {
-      id: 2,
-      processedDate: "26-01-2026",
-      supplierName: "Infosys",
-      bu: "OMI-ID23",
-      invoiceOrderNo: "SO-1002",
-      invoiceDate: "07-12-2025",
-      poNumber: "PO-9002",
-      fileName: "ACTON_1",
-      status: "Pending Approval",
-      reconciliationStatus: "Not Matched",
-    },
-    {
-      id: 3,
-      processedDate: "16-01-2026",
-      supplierName: "Clou-Kinetics",
-      bu: "OMI-ID",
-      invoiceOrderNo: "SASFUO-9781002",
-      invoiceDate: "21-11-2025",
-      poNumber: "PO-8352",
-      fileName: "ACTON_1",
-      status: "Pending Approval",
-      reconciliationStatus: "Matched",
-    },
-  ]);
+  const [rows, setRows] = useState([]);
 
   const [fileNameSearch, setFileNameSearch] = useState("");
   // const [poSearch, setPoSearch] = useState("");
 
-  const toDate = (d: string) => new Date(d.split("-").reverse().join("-"));
+  const toDate = (d?: string) => {
+    if (!d) return null; // handles undefined, null, ""
+    const parts = d.split("-");
+    if (parts.length !== 3) return null;
+    return new Date(parts.reverse().join("-"));
+  };
 
   // 🔹 Supplier dropdown (DynamoDB – logged-in user scope)
   const supplierList = ["Tata Motors", "Infosys", "Reliance"]; // map from API
@@ -259,20 +229,59 @@ const Dashboard = () => {
   // 🔹 Filter logic
 
   const filteredRows = useMemo(() => {
+    // Normalize date boundaries
+    const startTime = startDate
+      ? new Date(startDate).setHours(0, 0, 0, 0)
+      : null;
+
+    const endTime = endDate
+      ? new Date(endDate).setHours(23, 59, 59, 999)
+      : null;
+
     return rows.filter((r) => {
+      // Convert processed date safely
+      const processedTime = r.processedDate
+        ? new Date(r.processedDate).getTime()
+        : null;
+
       return (
+        // Supplier
         (!supplierSearch ||
-          r.supplierName.toLowerCase().includes(supplierSearch.toLowerCase())) &&
+          r.supplierName
+            ?.toLowerCase()
+            .includes(supplierSearch.toLowerCase())) &&
+
+        // Status
         (!status || r.status === status) &&
+
+        // Reconciliation Status
         (reconStatus === "All" ||
           r.reconciliationStatus === reconStatus) &&
+
+        // Invoice Order No
         (!invoiceOrder ||
-          r.invoiceOrderNo.toLowerCase().includes(invoiceOrder.toLowerCase())) &&
+          r.invoiceOrderNo
+            ?.toLowerCase()
+            .includes(invoiceOrder.toLowerCase())) &&
+
+        // File Name
         (!fileNameSearch ||
-          r.fileName.toLowerCase().includes(fileNameSearch.toLowerCase())) &&
+          r.fileName
+            ?.toLowerCase()
+            .includes(fileNameSearch.toLowerCase())) &&
+
+        // BU
         (!bu || r.bu === bu) &&
-        (!startDate || toDate(r.processedDate) >= new Date(startDate)) &&
-        (!endDate || toDate(r.processedDate) <= new Date(endDate))
+
+        // Start Date Filter
+        (!startTime ||
+          (processedTime !== null &&
+            processedTime >= startTime)) &&
+
+        // End Date Filter
+        (!endTime ||
+          (processedTime !== null &&
+            processedTime <= endTime))
       );
     });
   }, [
@@ -348,21 +357,64 @@ const Dashboard = () => {
 
   const handleBulkApprove = async () => {
     try {
+      const idsToApprove = filteredRows.map((row) => row.id);
+
+      if (idsToApprove.length === 0) return;
+
+      const response = await processingLogService.updateStatus(
+        idsToApprove,
+        "Approved",
+        "Invoice matched with supplier records"
+      );
+
+      // 🔥 Make sure API actually succeeded
+      if (!response || !response.updated_ids) {
+        throw new Error("Invalid API response");
+      }
+
+      const updatedIds: number[] = response.updated_ids;
+
+      // ✅ Update ONLY ids returned from backend
       setRows((prevRows) =>
         prevRows.map((row) =>
-          filteredRows.some((f) => f.id === row.id)
+          updatedIds.includes(row.id)
             ? { ...row, status: "Approved" }
             : row
         )
       );
 
-      // 🔥 IMPORTANT: reset filter so updated rows remain visible
       setStatus("Approved");
 
+      console.log("Updated IDs:", updatedIds);
+
     } catch (error) {
-      console.error(error);
+      console.error("Bulk approve failed:", error);
     }
   };
+
+  useEffect(() => {
+
+    const loadLogs = async () => {
+      if (!startDate || !endDate) {
+        return
+      }
+      setLoading(true);
+      try {
+        const data = await processingLogService.list(
+          startDate,
+          endDate
+        );
+        setRows(data);
+      } catch (error) {
+        console.error("API failed", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLogs();
+  }, [startDate, endDate]);
+  console.log(filteredRows)
   return (
     <Box>
       <Box>
@@ -546,7 +598,7 @@ const Dashboard = () => {
         <TableContainer
           sx={{
             flex: 1,
-            overflowY: "auto",
+            // overflowY: "auto",
           }}
         >
           <Table
@@ -557,7 +609,7 @@ const Dashboard = () => {
               tableLayout: "auto", // ✅ allow columns to auto-fit
               "& .MuiTableCell-root": {
                 fontSize: 11,
-                whiteSpace: "nowrap",
+                // whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 paddingTop: 1,
@@ -571,7 +623,7 @@ const Dashboard = () => {
                 "& .MuiTableCell-root": {
                   fontWeight: 600,
                   fontSize: 12,
-                  whiteSpace: "nowrap",
+                  // whiteSpace: "nowrap",
                   backgroundColor: "#F9FAFB",
                 },
               }}
@@ -621,10 +673,14 @@ const Dashboard = () => {
                       },
                     }}
                   >
-                    <TableCell sx={{ fontSize: 12 }}>{row.processedDate}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>
+                      {row.processedDate
+                        ? new Date(row.processedDate).toLocaleDateString("en-GB").replace(/\//g, "-")
+                        : ""}
+                    </TableCell>
                     <TableCell
                       sx={{
-                        whiteSpace: "nowrap",        // 🔥 single line
+                        // whiteSpace: "nowrap",        // 🔥 single line
                         overflow: "hidden",
                         textOverflow: "ellipsis",    // 🔥 show ...
                         maxWidth: 220,
@@ -634,7 +690,7 @@ const Dashboard = () => {
                         sx={{
                           fontSize: 11,
                           fontWeight: 500,
-                          whiteSpace: "nowrap",
+                          // whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
@@ -649,8 +705,9 @@ const Dashboard = () => {
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ fontSize: 12 }}>{row.invoiceOrderNo}</TableCell>
-                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceDate}</TableCell>
-
+                    <TableCell sx={{ fontSize: 12 }}>{row.invoiceDate
+                      ? new Date(row.invoiceDate).toLocaleDateString("en-GB").replace(/\//g, "-")
+                      : ""}</TableCell>
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center">
                         <Chip
@@ -705,7 +762,7 @@ const Dashboard = () => {
                         fontWeight: 600,
                         color: "#2F6FED",
                         cursor: "pointer",
-                        whiteSpace: "nowrap",   // 🔥 add this
+                        // whiteSpace: "nowrap",   // 🔥 add this
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         "&:hover": { textDecoration: "underline" },
@@ -716,6 +773,7 @@ const Dashboard = () => {
                           state: {
                             supplierName: row.supplierName, // ✅ FIX
                             fileName: row.fileName,
+                            file_path: row.file_path,
                             invoiceOrderNo: row.invoiceOrderNo,
                             status: row.status,
                             reconciliationStatus: row.reconciliationStatus,
@@ -825,12 +883,6 @@ const Dashboard = () => {
                                 </Typography>
                                 <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
                                   {latestRecord.invoicetype}
-                                </Typography>
-                                <Typography fontSize={11} color="text.secondary">
-                                  Is Duplicate
-                                </Typography>
-                                <Typography fontSize={11} sx={{ whiteSpace: "normal" }}>
-                                  {latestRecord.isduplicate}
                                 </Typography>
                               </Box>
                             </Box>

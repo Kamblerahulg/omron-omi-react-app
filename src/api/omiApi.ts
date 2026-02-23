@@ -14,10 +14,13 @@ export const getFiles = async (): Promise<string[]> => {
 /**
  * Build PDF URL from base name (served from /public/S3)
  */
-export const getPdfUrl = (baseName: string): string => {
-  return `/S3/${encodeURIComponent(baseName)}.pdf`;
+export const getPdfUrlOriginal = (baseName: string): string => {
+  return `/afd_docubo/afd-docubot-source/processed/${encodeURIComponent(baseName)}.pdf`;
 };
 
+export const getPdfUrlMasked = (baseName: string): string => {
+  return `/afd_docubot/afd-docubot-intermediate/masked_pdf/${encodeURIComponent(baseName)}.pdf`;
+};
 export const getJsonData = async (baseName: string): Promise<any> => {
   const res = await fetch(`/S3/${encodeURIComponent(baseName)}.json`);
 

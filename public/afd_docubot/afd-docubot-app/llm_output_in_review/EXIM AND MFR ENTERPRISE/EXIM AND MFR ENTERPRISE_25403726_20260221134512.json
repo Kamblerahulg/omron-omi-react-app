@@ -1,0 +1,47 @@
+[
+  {
+    "document_type": "invoice",
+    "InvoiceVendor_Name": "EXIM & MFR ENTERPRISE",
+    "Invoice_Number": "25410183",
+    "Invoice_DeliveryNoteNumber": "50341560",
+    "Invoice_Date": "2025-09-17",
+    "Invoice_TotalPrice": "36830.00",
+    "Invoice_TotalQuantity": null,
+    "Overall_Confidence_Score": 0.96,
+    "Invoice_Date_Matched": "Y",
+    "Invoice_TotalPrice_Matched": "N",
+    "items": [
+      {
+        "Invoice_Number": "U0P4202158-01",
+        "Invoice_ItemCode": null,
+        "Invoice_ItemName": null,
+        "Invoice_ItemQty": "300000",
+        "Invoice_ItemQtyUnitOfMeasurement": "pcs",
+        "Invoice_ItemUnitPrice": "0.015200",
+        "Invoice_ItemCurrencyCode": "USD",
+        "Invoice_ItemTotalPrice": "4560.00"
+      }
+    ]
+  },
+  {
+    "document_type": "delivery_notes",
+    "DO_Vendor_Name": "DO Vendor Name Test",
+    "DO_CustomDocumentDate": "2025-04-09",
+    "DO_CustomDocumentType": "pdf",
+    "DO_CustomDocumentNumber": null,
+    "DO_DeliveryNoteNumber": "ACSJKT2509012001",
+    "DO_DeliveryDate": "2025-09-25",
+    "DO_TotalQuantity": "400",
+    "DO_InvoiceNumber": "738577",
+    "DO_DeliveryDate_Matched": "Y",
+    "items": [
+      {
+        "DO_ItemCode": "DK3455",
+        "DO_ItemName": "DO ITEM TEST",
+        "DO_ItemQty": "30",
+        "DO_ItemUnitMeasurement": "PCS",
+        "DO_Item_PO_Number": "8375833"
+      }
+    ]
+  }
+]

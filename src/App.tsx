@@ -20,50 +20,50 @@ const AUTH_URL =
 
 function App() {
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const expiry = localStorage.getItem("token_expiry");
+  // useEffect(() => {
+  //   const fetchToken = async () => {
+  //     try {
+  //       const expiry = localStorage.getItem("token_expiry");
 
-        // If no token OR expired → fetch new
-        if (!expiry || Date.now() > Number(expiry)) {
+  //       // If no token OR expired → fetch new
+  //       if (!expiry || Date.now() > Number(expiry)) {
 
-          const response = await fetch(AUTH_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              client_id: "myclientid",
-              client_secret: "mysecret",
-            }),
-          });
+  //         const response = await fetch(AUTH_URL, {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             client_id: "myclientid",
+  //             client_secret: "mysecret",
+  //           }),
+  //         });
 
-          if (!response.ok) {
-            throw new Error("Token fetch failed");
-          }
+  //         if (!response.ok) {
+  //           throw new Error("Token fetch failed");
+  //         }
 
-          const data = await response.json();
+  //         const data = await response.json();
 
-          // Save token
-          localStorage.setItem("access_token", data.access_token);
+  //         // Save token
+  //         localStorage.setItem("access_token", data.access_token);
 
-          // Save expiry (1 hour)
-          localStorage.setItem(
-            "token_expiry",
-            (Date.now() + 60 * 60 * 1000).toString()
-          );
+  //         // Save expiry (1 hour)
+  //         localStorage.setItem(
+  //           "token_expiry",
+  //           (Date.now() + 60 * 60 * 1000).toString()
+  //         );
 
-          console.log("Auth token initialized");
-        }
+  //         console.log("Auth token initialized");
+  //       }
 
-      } catch (error) {
-        console.error("Auth error:", error);
-      }
-    };
+  //     } catch (error) {
+  //       console.error("Auth error:", error);
+  //     }
+  //   };
 
-    fetchToken();
-  }, []);
+  //   fetchToken();
+  // }, []);
 
   return (
     <ThemeProvider theme={theme}>

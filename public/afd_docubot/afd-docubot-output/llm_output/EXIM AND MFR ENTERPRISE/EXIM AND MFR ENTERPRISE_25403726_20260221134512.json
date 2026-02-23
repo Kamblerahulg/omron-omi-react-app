@@ -1,0 +1,44 @@
+[
+  {
+    "document_type": "invoice",
+    "InvoiceVendor_Name": "EXIM & MFR ENTERPRISE",
+    "Invoice_Number": "25410183",
+    "Invoice_DeliveryNoteNumber": "50341560",
+    "Invoice_Date": "2025-09-17",
+    "Invoice_TotalPrice": "4560.00",
+    "Invoice_TotalQuantity": null,
+    "Overall_Confidence_Score": 0.96
+    "items": [
+      {
+        "Invoice_Number": "U0P4202158-01",
+        "Invoice_ItemCode": null,
+        "Invoice_ItemName": null,
+        "Invoice_ItemQty": "300000",
+        "Invoice_ItemQtyUnitOfMeasurement": "pcs",
+        "Invoice_ItemUnitPrice": "0.015200",
+        "Invoice_ItemCurrencyCode": "USD",
+        "Invoice_ItemTotalPrice": "4560.00"
+      }
+    ]
+  },
+  {
+    "document_type": "delivery_notes",
+    "DO_Vendor_Name": null,
+    "DO_CustomDocumentDate": null,
+    "DO_CustomDocumentType": null,
+    "DO_CustomDocumentNumber": null,
+    "DO_DeliveryNoteNumber": "ACSJKT2509012001",
+    "DO_DeliveryDate": "2025-09-25",
+    "DO_TotalQuantity": null,
+    "DO_InvoiceNumber": null,
+    "items": [
+      {
+        "DO_ItemCode": null,
+        "DO_ItemName": null,
+        "DO_ItemQty": null,
+        "DO_ItemUnitMeasurement": null,
+        "DO_Item_PO_Number": null
+      }
+    ]
+  }
+]

@@ -19,7 +19,7 @@ import {
 import DescriptionIcon from "@mui/icons-material/Description";
 import ReconciliationTable from "../components/ReconciliationTable";
 import { rejectFile } from "../api/omiApi";
-import { getPdfUrl } from "../api/omiApi";
+import { getPdfUrlOriginal, getPdfUrlMasked } from "../api/omiApi";
 import PdfViewer from "../components/PdfViewer";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -31,6 +31,52 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+
+interface InvoiceItem {
+  Invoice_Number?: string;
+  Invoice_ItemCode?: string | null;
+  Invoice_ItemName?: string | null;
+  Invoice_ItemQty?: string | null;
+  Invoice_ItemQtyUnitOfMeasurement?: string | null;
+  Invoice_ItemUnitPrice?: string | null;
+  Invoice_ItemCurrencyCode?: string | null;
+  Invoice_ItemTotalPrice?: string | null;
+}
+
+interface InvoiceDoc {
+  document_type: "invoice";
+  InvoiceVendor_Name?: string;
+  Invoice_Number?: string;
+  Invoice_DeliveryNoteNumber?: string;
+  Invoice_Date?: string;
+  Invoice_TotalPrice?: string;
+  Invoice_TotalQuantity?: string | null;
+  Invoice_Date_Matched?: "Y" | "N";
+  Invoice_TotalPrice_Matched?: "Y" | "N";
+  items?: InvoiceItem[];
+}
+
+interface DeliveryItem {
+  DO_ItemCode?: string | null;
+  DO_ItemName?: string | null;
+  DO_ItemQty?: string | null;
+  DO_ItemUnitMeasurement?: string | null;
+  DO_Item_PO_Number?: string | null;
+}
+
+interface DeliveryDoc {
+  document_type: "delivery_notes";
+  DO_Vendor_Name?: string | null;
+  DO_CustomDocumentDate?: string | null;
+  DO_CustomDocumentType?: string | null;
+  DO_CustomDocumentNumber?: string | null;
+  DO_DeliveryNoteNumber?: string | null;
+  DO_DeliveryDate?: string | null;
+  DO_TotalQuantity?: string | null;
+  DO_InvoiceNumber?: string | null;
+  DO_DeliveryDate_Matched?: "Y" | "N";
+  items?: DeliveryItem[];
+}
 
 type RowType = {
   invoiceNumber: string;
@@ -47,11 +93,6 @@ type StatusType =
   | "JDE-Error"
   | "Rejected";
 
-const invoiceItems = [
-  { itemNo: "ITM-01", itemName: "Steel Bolt 12mm", qty: 10, amount: 50000, flag: "Y" },
-  { itemNo: "ITM-02", itemName: "Hex Nut 12mm", qty: 5, amount: 40000, flag: "N" },
-  { itemNo: "ITM-03", itemName: "Washer 12mm", qty: 7, amount: 35000, flag: "Y" },
-];
 
 const ammicInvoiceItems = [
   { a_itemNo: "AM-01", a_itemName: "AMMIC Item Name 1", a_invoiceitemqty: 43, a_invoiceitemtotalprice: 62400 },
@@ -63,19 +104,6 @@ const normalizedAmmicInvoiceItems = ammicInvoiceItems.map(item => ({
   qty: item.a_invoiceitemqty,
   amount: item.a_invoiceitemtotalprice,
 }));
-
-const invoiceSummary = {
-  supplierName: "Automation Center Singapore POC Lab",
-  invoiceDate: "21-Feb-2026",
-  invoicetotalprice: "$ 31,600",
-  invoicetotalqty: 65,
-  invoicedeliverynoteno: "IN-IS-9374",
-  invoiceReff: "INV-3673",
-  ismatch_invdate: "Y" as "Y",
-  ismatch_invtotalprice: "N" as "N",
-  ismatch_invreff: "Y" as "Y",
-};
-
 
 const ammicInvoiceSummary = {
   supplierName: "Automation Center Singapore POC Lab",
@@ -128,27 +156,6 @@ const ammicDeliverySummary = {
   ),
 };
 
-const deliveryItems = [
-  { itemCode: "DI-01", itemName: "Steel Bolt 12mm", itemUM: "PCS", itemQty: 5, flag: "N" },
-  { itemCode: "DI-02", itemName: "Hex Nut 12mm", itemUM: "PCS", itemQty: 52, flag: "N" },
-  { itemCode: "DO-03", itemName: "Washer 12mm", itemUM: "PCS", itemQty: 68, flag: "Y" },
-];
-
-const invoiceDeliverySummary = {
-  i_dodInvRef: "OMI-REF-7788",
-  i_dodInvNo: "OMI-DO-7788",
-  i_dodNoteReff: "OMI-NOTE-REF",
-  i_dodNoteNo: "OMI-DN-8899",
-  i_docDocDate: "13-Jan-2026",
-  i_docDocType: "BILL",
-  i_docDocNo: "OMI-DOC-5544",
-  i_dodDate: "13-Jan-2026",
-  ismatch_ideliverydate: "N" as "N",
-  i_doTotQty: deliveryItems.reduce(
-    (sum, i) => sum + i.itemQty,
-    0
-  ),
-};
 
 const SectionBody = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -156,18 +163,17 @@ const SectionBody = ({ children }: { children: React.ReactNode }) => (
       px: 2,
       pt: 0.5,
       pb: 1,
-      borderBottom: "1px solid #E5E7EB", // add bottom border
+      borderBottom: "1px solid #E5E7EB",
     }}
   >
     {children}
   </Box>
 );
 
-
 const SectionTable = ({ children }: { children: React.ReactNode }) => (
   <Box
     sx={{
-      flex: 1,                  // ✅ takes remaining height
+      flex: 1,
       overflow: "auto",
       px: 1,
       pt: 2,
@@ -175,6 +181,152 @@ const SectionTable = ({ children }: { children: React.ReactNode }) => (
   >
     {children}
   </Box>
+);
+
+const InvoiceItemsTable = ({
+  rows,
+}: {
+  rows: any[];
+}) => (
+  <Table
+    size="small"
+    sx={{
+      "& .MuiTableCell-root": {
+        fontSize: "12px",
+        padding: "4px 8px",
+      },
+      "& .MuiTableHead-root .MuiTableCell-root": {
+        fontSize: "11.5px",
+        fontWeight: 600,
+        backgroundColor: "#F9FAFB",
+      },
+      "& .MuiTableRow-root": {
+        height: 30,
+      },
+    }}
+  >
+    <TableHead>
+      <TableRow>
+        <TableCell>Item Number</TableCell>
+        <TableCell>Item Code</TableCell>
+        <TableCell>Item Name</TableCell>
+        <TableCell>Qty</TableCell>
+        <TableCell>Unit</TableCell>
+        <TableCell align="right">Unit Price</TableCell>
+        <TableCell align="right">Total Price</TableCell>
+      </TableRow>
+    </TableHead>
+
+    <TableBody>
+      {rows?.length > 0 ? (
+        rows.map((row, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              {row.Invoice_Number ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.Invoice_ItemCode ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.Invoice_ItemName ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.Invoice_ItemQty ?? "0"}
+            </TableCell>
+
+            <TableCell>
+              {row.Invoice_ItemQtyUnitOfMeasurement ?? "-"}
+            </TableCell>
+
+            <TableCell align="right">
+              {row.Invoice_ItemUnitPrice ?? "0.00"}
+            </TableCell>
+
+            <TableCell align="right">
+              {row.Invoice_ItemTotalPrice ?? "0.00"}
+            </TableCell>
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={7} align="center">
+            No Invoice Items Found
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
+);
+
+const DeliveryItemsTable = ({
+  rows,
+}: {
+  rows: any[];
+}) => (
+  <Table
+    size="small"
+    sx={{
+      "& .MuiTableCell-root": {
+        fontSize: "12px",
+        padding: "4px 8px",
+      },
+      "& .MuiTableHead-root .MuiTableCell-root": {
+        fontSize: "11.5px",
+        fontWeight: 600,
+        backgroundColor: "#F9FAFB",
+      },
+      "& .MuiTableRow-root": {
+        height: 30,
+      },
+    }}
+  >
+    <TableHead>
+      <TableRow>
+        <TableCell>Item Code</TableCell>
+        <TableCell>Item Name</TableCell>
+        <TableCell>PO Number</TableCell>
+        <TableCell>Unit</TableCell>
+        <TableCell>Qty</TableCell>
+      </TableRow>
+    </TableHead>
+
+    <TableBody>
+      {rows?.length > 0 ? (
+        rows.map((row, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              {row.DO_ItemCode ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.DO_ItemName ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.DO_Item_PO_Number ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.DO_ItemUnitMeasurement ?? "-"}
+            </TableCell>
+
+            <TableCell>
+              {row.DO_ItemQty ?? "0"}
+            </TableCell>
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={5} align="center">
+            No Delivery Items Found
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
 );
 
 const ItemsTable = ({
@@ -190,16 +342,16 @@ const ItemsTable = ({
     size="small"
     sx={{
       "& .MuiTableCell-root": {
-        fontSize: "12px",      // 🔥 smaller font
-        padding: "4px 8px",    // 🔥 reduce cell padding
+        fontSize: "12px",
+        padding: "4px 8px",
       },
       "& .MuiTableHead-root .MuiTableCell-root": {
-        fontSize: "11.5px",    // 🔥 slightly smaller header
+        fontSize: "11.5px",
         fontWeight: 600,
         backgroundColor: "#F9FAFB",
       },
       "& .MuiTableRow-root": {
-        height: 30,            // 🔥 compact row height
+        height: 30,
       },
     }}
   >
@@ -226,236 +378,122 @@ const ItemsTable = ({
     </TableHead>
 
     <TableBody>
-      {rows.map((row, index) => (
-        <TableRow key={index}>
-          {view === "INVOICE" ? (
-            <>
-              <TableCell
-                sx={{
-                  color:
-                    showFlag && row.flag
-                      ? row.flag === "Y"
+      {rows?.length > 0 ? (
+        rows.map((row, index) => (
+          <TableRow key={index}>
+            {view === "INVOICE" ? (
+              <>
+                <TableCell
+                  sx={{
+                    color:
+                      showFlag &&
+                        row.Invoice_TotalPrice_Matched === "Y"
                         ? "success.main"
-                        : "error.main"
-                      : "inherit",
-                  fontWeight: showFlag ? 600 : 400,
-                }}
-              >
-                {row.itemNo}
-              </TableCell>
-              <TableCell>{row.itemName}</TableCell>
-              <TableCell>{row.qty}</TableCell>
-              <TableCell align="right">{row.amount}</TableCell>
-            </>
-          ) : (
-            <>
-              <TableCell>{row.itemCode}</TableCell>
-              <TableCell>{row.itemName}</TableCell>
-              <TableCell>{row.itemUM}</TableCell>
-              <TableCell>{row.itemQty}</TableCell>
-            </>
-          )}
+                        : showFlag &&
+                          row.Invoice_TotalPrice_Matched === "N"
+                          ? "error.main"
+                          : "inherit",
+                    fontWeight: showFlag ? 600 : 400,
+                  }}
+                >
+                  {row.Invoice_ItemCode ??
+                    row.Invoice_Number ??
+                    "-"}
+                </TableCell>
+
+                <TableCell>
+                  {row.Invoice_ItemName ?? "-"}
+                </TableCell>
+
+                <TableCell>
+                  {row.Invoice_ItemQty ?? "0"}
+                </TableCell>
+
+                <TableCell align="right">
+                  {row.Invoice_ItemTotalPrice ?? "0.00"}
+                </TableCell>
+              </>
+            ) : (
+              <>
+                <TableCell>
+                  {row.DO_ItemCode ?? "-"}
+                </TableCell>
+
+                <TableCell>
+                  {row.DO_ItemName ?? "-"}
+                </TableCell>
+
+                <TableCell>
+                  {row.DO_ItemUnitMeasurement ?? "-"}
+                </TableCell>
+
+                <TableCell>
+                  {row.DO_ItemQty ?? "0"}
+                </TableCell>
+              </>
+            )}
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={4} align="center">
+            No Items Found
+          </TableCell>
         </TableRow>
-      ))}
+      )}
     </TableBody>
   </Table>
 );
 
-
-const SummaryHeaderAMMIC = ({
-  data,
-  view,
+const Field = ({
+  label,
+  value,
+  color = "inherit",
 }: {
-  data: any;
-  view: "AMMIC" | "DELIVERY";
-}) => {
-  if (view === "DELIVERY") {
-    return (
-      <Box>
-        <Typography
-          fontSize={13}
-          fontWeight={550}
-          color="#0F172A"
-          mt={0.5}
-          mb={0}
-          sx={{
-            textDecoration: "underline",
-            textUnderlineOffset: "3px",   // spacing between text & line
-          }}
-        >
-          Delivery Order
-        </Typography>
-        <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.invoiceRef}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_dodInvRef ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryInvoiceno}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_dodInvNo ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryNoteRef}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_dodNoteReff ?? "-"}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryNoteNumber}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_dodNoteNo ?? "-"}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocDate}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_docDocDate ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocType}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_docDocType ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocNumber}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_docDocNo ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryDate}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_dodDate ?? "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.totalQty}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.a_doTotQty ?? "-"}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
-
-  // ✅ INVOICE VIEW (default)
-  return (
-    <Box>
-      <Typography
-        fontSize={13}
-        fontWeight={550}
-        color="#0F172A"
-      >
-        {data.supplierName || "-"}
-      </Typography>
-
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(3, 1fr)"
-        gap={2}
-      >
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Date
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px">
-            {data.a_invoiceDate || "-"}
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Total Price
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px">
-            {data.a_invoicetotalprice ?? "-"}
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Number
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px" >
-            {data.a_invoicetotalqty || "-"}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Delivery Note Number
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px">
-            {data.a_invoicedeliverynoteno || "-"}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Total Quantity
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px">
-            {data.a_invoicetotalqty || "-"}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Reff.
-          </Typography>
-          <Typography fontWeight={500} fontSize="12px">
-            {data.a_invoiceReff || "-"}
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-};
+  label: string;
+  value?: any;
+  color?: string;
+}) => (
+  <Box>
+    <Typography fontSize={12} color="text.secondary">
+      {label}
+    </Typography>
+    <Typography fontWeight={500} fontSize="12px" color={color}>
+      {value ?? "-"}
+    </Typography>
+  </Box>
+);
 
 const SummaryHeaderInvoice = ({
   data,
-  flags, // <-- new prop
   view,
 }: {
   data: any;
-  flags?: {
-    ismatch_invdate?: "Y" | "N";
-    ismatch_invtotalprice?: "Y" | "N";
-    ismatch_invreff?: "Y" | "N";
-    ismatch_ideliverydate?: "Y" | "N";
-  };
   view: "INVOICE" | "DELIVERY";
 }) => {
+  if (!data) return null;
+
+  // ==========================
+  // DELIVERY VIEW
+  // ==========================
   if (view === "DELIVERY") {
+    const formatDate = (date?: string) => {
+      if (!date) return "-";
+
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "-";
+
+      return d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    };
+
+    const safeValue = (val: any) => {
+      return val ?? "-";
+    };
+
     return (
       <Box>
         <Typography
@@ -463,183 +501,120 @@ const SummaryHeaderInvoice = ({
           fontWeight={550}
           color="#0F172A"
           mt={0.5}
-          mb={0}
           sx={{
             textDecoration: "underline",
-            textUnderlineOffset: "3px",   // spacing between text & line
+            textUnderlineOffset: "3px",
           }}
         >
           Delivery Order
         </Typography>
 
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.invoiceRef}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_dodInvRef ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Delivery Invoice Ref"
+            value={safeValue(data.DO_InvoiceRef)}
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryInvoiceno}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_dodInvNo ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Delivery Invoice Number"
+            value={safeValue(data.DO_InvoiceNumber)}
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryNoteRef}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_dodNoteReff ?? "-"}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryNoteNumber}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_dodNoteNo ?? "-"}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocDate}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_docDocDate ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Delivery Note Ref"
+            value={safeValue(data.DO_DeliveryNoteRef)}
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocType}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_docDocType ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Delivery Note Number"
+            value={safeValue(data.DO_DeliveryNoteNumber)}
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.customDocNumber}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_docDocNo ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Custom Document Date"
+            value={formatDate(data.DO_CustomDocumentDate)}
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.deliveryDate}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px" color={
-              flags?.ismatch_ideliverydate === "Y"
+          <Field
+            label="DO Custom Document Type"
+            value={safeValue(data.DO_CustomDocumentType)}
+          />
+
+          <Field
+            label="DO Custom Document Number"
+            value={safeValue(data.DO_CustomDocumentNumber)}
+          />
+
+          <Field
+            label="DO Delivery Date"
+            value={formatDate(data.DO_DeliveryDate)}
+            color={
+              data.DO_DeliveryDate_Matched === "Y"
                 ? "success.main"
-                : flags?.ismatch_ideliverydate === "N"
+                : data.DO_DeliveryDate_Matched === "N"
                   ? "error.main"
                   : "inherit"
             }
-            >
-              {data.i_dodDate ?? "-"}
-            </Typography>
-          </Box>
+          />
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              {DO_LABELS.totalQty}
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.i_doTotQty ?? "-"}
-            </Typography>
-          </Box>
+          <Field
+            label="DO Total Quantity"
+            value={safeValue(data.DO_TotalQuantity)}
+          />
         </Box>
-      </Box >
+      </Box>
     );
   }
 
-
-  // ✅ INVOICE VIEW (default)
+  // ==========================
+  // INVOICE VIEW
+  // ==========================
   return (
     <Box>
-      <Typography fontSize={13}
-        fontWeight={550} color="#0F172A">
-        {data.supplierName || "-"}
+      <Typography fontSize={13} fontWeight={550} color="#0F172A">
+        {data.InvoiceVendor_Name ?? "-"}
       </Typography>
 
-      <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2}>
-        {/* Invoice Date */}
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice Date
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invdate === "Y" ? "success.main" : "error.main"}>
-              {data.invoiceDate || "-"}
-            </Typography>
-          </Box>
-        </Box>
+      <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3}>
+        <Field
+          label="Invoice Date"
+          value={data.Invoice_Date}
+          color={
+            data.Invoice_Date_Matched === "Y"
+              ? "success.main"
+              : data.Invoice_Date_Matched === "N"
+                ? "error.main"
+                : "inherit"
+          }
+        />
 
-        {/* Invoice Total Price */}
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice Total Price
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invtotalprice === "Y" ? "success.main" : "error.main"}>
-              {data.invoicetotalprice || "-"}
-            </Typography>
-          </Box>
-        </Box>
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice Number
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.invoiceReff || "-"}
-            </Typography>
-          </Box>
-        </Box>
+        <Field
+          label="Invoice Total Price"
+          value={data.Invoice_TotalPrice}
+          color={
+            data.Invoice_TotalPrice_Matched === "Y"
+              ? "success.main"
+              : data.Invoice_TotalPrice_Matched === "N"
+                ? "error.main"
+                : "inherit"
+          }
+        />
 
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice Delivery Note Number
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.invoicedeliverynoteno || "-"}
-            </Typography>
-          </Box>
-        </Box>
+        <Field label="Invoice Number" value={data.Invoice_Number} />
 
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Invoice Total Quantity
-            </Typography>
-            <Typography fontWeight={500} fontSize="12px">
-              {data.invoicetotalqty || "-"}
-            </Typography>
-          </Box>
-        </Box>
+        <Field
+          label="Invoice Delivery Note Number"
+          value={data.Invoice_DeliveryNoteNumber}
+        />
 
-        {/* Invoice Reff */}
-        <Box display="flex" flexDirection="column">
-          <Typography fontSize={12} color="text.secondary">
-            Invoice Reff.
-          </Typography>
-
-          <Typography fontWeight={500} fontSize="12px" color={flags.ismatch_invreff === "Y" ? "success.main" : "error.main"}>
-            {data.invoiceReff || "-"}
-          </Typography>
-        </Box>
-
+        <Field
+          label="Invoice Total Quantity"
+          value={data.Invoice_TotalQuantity}
+        />
+        <Field
+          label="Invoice Reff."
+          value={data.Invoice_ref ?? "-"}
+        />
       </Box>
     </Box>
   );
@@ -719,11 +694,117 @@ export default function OMI() {
   const [itemView, setItemView] = useState<"INVOICE" | "DELIVERY">("INVOICE");
   const [ammicItemView, setAmmicItemView] = useState<"AMMIC" | "DELIVERY">("AMMIC");
   const [selectedView, setSelectedView] = useState<"INVOICE" | "DELIVERY">("INVOICE");
+  // ===============================
+  // STATE
+  // ===============================
+
+  const [invoiceSummary, setInvoiceSummary] = useState<InvoiceDoc | null>(null);
+  const [invoiceDeliverySummary, setInvoiceDeliverySummary] = useState<DeliveryDoc | null>(null);
+
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [deliveryItems, setDeliveryItems] = useState<DeliveryItem[]>([]);
+
+  const [invoiceAmmicSummary, setInvoiceAmmicSummary] = useState<InvoiceDoc | null>(null);
+  const [invoiceDeliveryAmmicSummary, setInvoiceDeliveryAmmicSummary] = useState<DeliveryDoc | null>(null);
+
+  const [invoiceAmmicItems, setInvoiceAmmicItems] = useState<InvoiceItem[]>([]);
+  const [deliveryAmmicItems, setDeliveryAmmicItems] = useState<DeliveryItem[]>([]);
+  // ===============================
+  // PROCESS JSON DATA
+  // ===============================
+
+  const processJsonData = (data: any[]) => {
+    if (!Array.isArray(data)) return;
+
+    const invoiceDoc = data.find(
+      (d): d is InvoiceDoc => d.document_type === "invoice"
+    );
+
+    const deliveryDoc = data.find(
+      (d): d is DeliveryDoc => d.document_type === "delivery_notes"
+    );
+    console.log("Invoice Document:", invoiceDoc);
+    console.log("Delivery Document:", deliveryDoc);
+    // INVOICE
+    setInvoiceSummary(invoiceDoc ?? null);
+    setInvoiceItems(invoiceDoc?.items ?? []);
+    // console.log("Invoice item:", invoiceDoc);
+    // DELIVERY
+    setInvoiceDeliverySummary(deliveryDoc ?? null);
+    setDeliveryItems(deliveryDoc?.items ?? []);
+    console.log("Delivery item:", deliveryItems);
+
+  };
+  const processAmmicJsonData = (data: any[]) => {
+    if (!Array.isArray(data)) return;
+
+    const invoiceDoc = data.find(
+      (d): d is InvoiceDoc => d.document_type === "invoice"
+    );
+
+    const deliveryDoc = data.find(
+      (d): d is DeliveryDoc => d.document_type === "delivery_notes"
+    );
+    console.log("Invoice ammic Document:", invoiceDoc);
+    console.log("Delivery ammic Document:", deliveryDoc);
+    // INVOICE
+    setInvoiceAmmicSummary(invoiceDoc ?? null);
+    setInvoiceAmmicItems(invoiceDoc?.items ?? []);
+    // console.log("Invoice item:", invoiceDoc);
+    // DELIVERY
+    setInvoiceDeliveryAmmicSummary(deliveryDoc ?? null);
+    setDeliveryAmmicItems(deliveryDoc?.items ?? []);
+    console.log("Delivery ammic item:", deliveryItems);
+  };
+
+  // ===============================
+  // LOAD JSON
+  // ===============================
+
+  useEffect(() => {
+    const loadJson = async () => {
+      try {
+        const response = await fetch(
+          "/afd_docubot/afd-docubot-app/llm_output_in_review/EXIM AND MFR ENTERPRISE/EXIM AND MFR ENTERPRISE_25403726_20260221134512.json"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch JSON file");
+        }
+
+        const data = await response.json();
+
+        processJsonData(data);
+      } catch (error) {
+        console.error("Failed to load JSON:", error);
+      }
+    };
+    const loadAmmic = async () => {
+      try {
+        const response = await fetch(
+          "/afd_docubot/afd-docubot-app/ammic_data_in_review/EXIM AND MFR ENTERPRISE/EXIM AND MFR ENTERPRISE_25403726_20260221134512.json"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch JSON file");
+        }
+
+        const data = await response.json();
+
+        processAmmicJsonData(data);
+      } catch (error) {
+        console.error("Failed to load JSON:", error);
+      }
+    };
+    loadJson();
+    loadAmmic();
+  }, []);
 
   /* ---------- ROUTE STATE ---------- */
   const {
     fileName,
     supplierName,
+    file_path,
     invoiceOrderNo,
     status: routeStatus,
     reconciliationStatus,
@@ -764,17 +845,22 @@ export default function OMI() {
     if (fileName) setSelectedFile(fileName);
   }, [fileName]);
 
+
   useEffect(() => {
-    if (!selectedFile) return;
-
-    const url =
-      pdfType === "original"
-        ? getPdfUrl(selectedFile)
-        : getPdfUrl(`masked/${selectedFile}`); // adjust if API differs
-
-    setPdfUrl(url.startsWith("/") ? url : `/${url}`);
+    if (!file_path) return;
+    const cleanFileName = file_path.replace(/^\/+/, "");
+    console.log(file_path)
+    const baseName = cleanFileName.replace(/\.[^/.]+$/, "");
+    const folderName = baseName.substring(0, baseName.indexOf("_"));
+    let url = "";
+    if (pdfType === "original") {
+      url = `/afd_docubot/afd-docubot-source/processed/${file_path}.pdf`;
+    } else {
+      url = `/afd_docubot/afd-docubot-intermediate/masked_pdf/${file_path}.pdf`;
+    }
+    console.log("Final URL:", url);
+    setPdfUrl(url);
   }, [selectedFile, pdfType]);
-
 
   useEffect(() => {
     if (jsonData && !originalJson) {
@@ -831,7 +917,7 @@ export default function OMI() {
   const handleOpenPdf = () => {
     if (!fileName) return;
 
-    const url = getPdfUrl(fileName);
+    const url = getPdfUrlOriginal(fileName);
     const finalUrl = url.startsWith("/") ? url : `/${url}`;
 
     window.open(finalUrl, "_blank"); // ✅ opens in new tab
@@ -857,7 +943,7 @@ export default function OMI() {
         sx={{
           mb: 0.5,
           mt: 0.5,
-          px: 1.5,         // slightly smaller padding
+          px: 1.5,
           py: 1.5,
           borderRadius: 2,
           background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
@@ -866,9 +952,10 @@ export default function OMI() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(8, 1fr)", // 7 fields + chip
-            alignItems: "center",
-            gap: 1.5,    // smaller gap
+            // 🔥 Make Supplier Name wider
+            gridTemplateColumns: "2fr repeat(6, 1fr) auto",
+            alignItems: "start", // allow wrapping height expansion
+            gap: 1.5,
           }}
         >
           {[
@@ -879,35 +966,42 @@ export default function OMI() {
             { label: "Batch No.", value: a_BatchNo || "787346" },
             { label: "Interface Remark", value: a_InterfaceRmk || "Quality Best" },
             { label: "Duplicate", value: is_duplicate || "Y" },
-          ].map((item, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minWidth: 0,
-                pr: index < 6 ? 2 : 0,      // spacing before divider
-                borderRight: index < 6 ? "1px solid #E5E7EB" : "none", // vertical divider except last
-              }}
-            >
-              <Typography
-                fontSize={9}                 // 🔹 smaller font
-                color="text.secondary"
-                noWrap
-                sx={{ mb: 0.25 }}           // tighter spacing
-              >
-                {item.label}
-              </Typography>
+          ].map((item, index) => {
+            const isSupplier = index === 0;
 
-              <Typography
-                fontWeight={600}
-                fontSize={11}               // 🔹 smaller value text
-                noWrap
+            return (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minWidth: 0,
+                  pr: index < 6 ? 2 : 0,
+                  borderRight: index < 6 ? "1px solid #E5E7EB" : "none",
+                }}
               >
-                {item.value}
-              </Typography>
-            </Box>
-          ))}
+                <Typography
+                  fontSize={9}
+                  color="text.secondary"
+                  sx={{ mb: 0.25 }}
+                >
+                  {item.label}
+                </Typography>
+
+                <Typography
+                  fontWeight={600}
+                  fontSize={11}
+                  // 🔥 Wrap only Supplier Name
+                  sx={{
+                    whiteSpace: isSupplier ? "normal" : "nowrap",
+                    wordBreak: isSupplier ? "break-word" : "normal",
+                  }}
+                >
+                  {item.value}
+                </Typography>
+              </Box>
+            );
+          })}
 
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Chip
@@ -920,7 +1014,7 @@ export default function OMI() {
                     ? "error"
                     : "warning"
               }
-              sx={{ fontWeight: 600, fontSize: 10, height: 22 }} // smaller chip
+              sx={{ fontWeight: 600, fontSize: 10, height: 22 }}
             />
           </Box>
         </Box>
@@ -1081,33 +1175,26 @@ export default function OMI() {
           {/* Top 25% */}
           <SectionBody>
             <SummaryHeaderInvoice
-              data={selectedView === "DELIVERY" ? invoiceDeliverySummary : invoiceSummary}
-              view={selectedView}
-              flags={
-                selectedView === "INVOICE"
-                  ? {
-                    ismatch_invdate: invoiceSummary.ismatch_invdate,
-                    ismatch_invtotalprice: invoiceSummary.ismatch_invtotalprice,
-                    ismatch_invreff: invoiceSummary.ismatch_invreff,
-                  }
-                  : {
-                    ismatch_ideliverydate: invoiceDeliverySummary.ismatch_ideliverydate,
-                  }
+              data={
+                selectedView === "DELIVERY"
+                  ? invoiceDeliverySummary ?? {}
+                  : invoiceSummary ?? {}
               }
-
+              view={selectedView}
             />
           </SectionBody>
 
           <Divider />
 
           <SectionTable>
-            <ItemsTable
-              rows={selectedView === "INVOICE" ? invoiceItems : deliveryItems}
-              view={selectedView}
-              showFlag={selectedView === "INVOICE"}
-            />
+            {selectedView === "INVOICE" ? (
+              <InvoiceItemsTable rows={invoiceItems} />
+            ) : (
+              <DeliveryItemsTable
+                rows={deliveryItems}
+              />
+            )}
           </SectionTable>
-
         </Paper>
         <Paper
           sx={{
@@ -1162,20 +1249,28 @@ export default function OMI() {
 
           <Divider />
           <SectionBody>
-            <SummaryHeaderAMMIC
-              data={selectedView === "DELIVERY" ? ammicDeliverySummary : ammicInvoiceSummary}
-              view={selectedView === "DELIVERY" ? "DELIVERY" : "AMMIC"} // mapping INVOICE -> AMMIC
+            <SummaryHeaderInvoice
+              data={
+                selectedView === "DELIVERY"
+                  ? invoiceDeliveryAmmicSummary ?? {}
+                  : invoiceAmmicSummary ?? {}
+              }
+              view={selectedView}
             />
           </SectionBody>
 
           <Divider />
 
           <SectionTable>
-            <ItemsTable
-              rows={selectedView === "INVOICE" ? normalizedAmmicInvoiceItems : ammicDeliveryItems}
-              view={selectedView} // INVOICE or DELIVERY
-              showFlag={false}
-            />
+            {selectedView === "INVOICE" ? (
+              <InvoiceItemsTable
+                rows={invoiceAmmicItems}
+              />
+            ) : (
+              <DeliveryItemsTable
+                rows={deliveryAmmicItems}
+              />
+            )}
           </SectionTable>
 
         </Paper>

@@ -1,0 +1,26 @@
+{
+   [ {
+        "ID": 469,
+        "IDVend": 0011,
+        "IDInvc": 25410183,
+        "TextTrx": 1,
+        "DateInvc": "2025-09-17 00:00:00",
+        "InvcDesc": "AST-25V21-11",
+        "IsProcess": 1,
+        "ImportedDate": "2026-02-22 00:00:00",
+        "LastProcessDate": "2026-02-22 00:00:00",
+        "Errors": "Warning. An invoice already exists for this vendor and document date."
+    },
+    {
+        "ID": 467,
+        "IDVend": 1240,
+        "IDInvc": 2045726,
+        "TextTrx": 1,
+        "DateInvc": "00:00.0",
+        "InvcDesc": null,
+        "IsProcess": 1,
+        "ImportedDate": "2026-02-22 00:00:00",
+        "LastProcessDate": "2026-02-22 00:00:00",
+        "Errors": "Warning. An invoice already exists for this vendor and document date."
+    }
+]}

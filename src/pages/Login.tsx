@@ -84,8 +84,8 @@ const Login = () => {
 
             if (!res.ok) throw new Error("SSO failed");
 
-            const data = await res.json();
-            localStorage.setItem("app_token", data.jwt);
+            // const data = await res.json();
+            // localStorage.setItem("app_token", data.jwt);
 
             navigate("/landing-omi");
         } catch (error) {
