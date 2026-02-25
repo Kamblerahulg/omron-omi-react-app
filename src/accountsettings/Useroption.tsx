@@ -8,7 +8,8 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
-
+import { useEffect } from "react";
+import { userService } from "../services/user.service";
 type UserState = "Created" | "Active" | "Inactive" | "Suspended";
 
 interface User {
@@ -22,15 +23,53 @@ interface User {
 const STATUS: UserState[] = ["Created", "Active", "Inactive", "Suspended"];
 
 export default function UserOption() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      name: "Rahul Kamble",
-      email: "rahul@company.com",
-      status: "Active",
-      active: true,
-    },
-  ]);
+  // const [users, setUsers] = useState<User[]>([
+  //   {
+  //     id: "1",
+  //     name: "Rahul Kamble",
+  //     email: "rahul@company.com",
+  //     status: "Active",
+  //     active: true,
+  //   },
+  // ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+
+        const data = await userService.list();
+
+        const normalized = data.map((u: any) => {
+          let mappedStatus: UserState = "Created";
+
+          if (u.status === "ACTIVE") mappedStatus = "Active";
+          else if (u.status === "INACTIVE") mappedStatus = "Inactive";
+          else if (u.status === "SUSPENDED") mappedStatus = "Suspended";
+
+          return {
+            id: u.user_id,
+            name: u.username,
+            email: u.email,
+            status: mappedStatus,
+            active: u.status === "ACTIVE",
+          };
+        });
+
+        setUsers(normalized);
+
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const emptyUser: User = {
     id: "",
@@ -44,17 +83,65 @@ export default function UserOption() {
   const [editing, setEditing] = useState<User | null>(null);
   const [form, setForm] = useState<User>(emptyUser);
 
-  const saveUser = () => {
-    if (editing) {
-      setUsers(prev => prev.map(u => (u.id === editing.id ? form : u)));
-    } else {
-      setUsers(prev => [...prev, { ...form, id: Date.now().toString() }]);
-    }
-    setOpen(false);
-    setEditing(null);
-    setForm(emptyUser);
-  };
+  const saveUser = async () => {
+    try {
+      if (!form.name || !form.email) return;
 
+      // 🔹 If editing → just update locally (until PUT API exists)
+      if (editing) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editing.id
+              ? { ...u, name: form.name, email: form.email, status: form.status }
+              : u
+          )
+        );
+
+        setOpen(false);
+        setEditing(null);
+        setForm(emptyUser);
+        return;
+      }
+
+      // 🔹 Create New User
+      const statusMap: Record<UserState, "ACTIVE" | "INACTIVE" | "SUSPENDED"> = {
+        Created: "INACTIVE",
+        Active: "ACTIVE",
+        Inactive: "INACTIVE",
+        Suspended: "SUSPENDED",
+      };
+
+      const payload = {
+        user_id: Date.now().toString(),
+        username: form.name,
+        password: "TempPassword@123",
+        email: form.email,
+        status: statusMap[form.status],
+      };
+      const response = await userService.create(payload);
+
+      if (!response?.user_id) {
+        throw new Error("Invalid create response");
+      }
+
+      setUsers((prev) => [
+        ...prev,
+        {
+          id: payload.user_id,
+          name: payload.username,
+          email: payload.email,
+          status: form.status,
+          active: form.status === "Active",
+        },
+      ]);
+
+      setOpen(false);
+      setForm(emptyUser);
+
+    } catch (error) {
+      console.error("User creation failed:", error);
+    }
+  };
   return (
     <Box>
 
@@ -64,7 +151,7 @@ export default function UserOption() {
         justifyContent="space-between"
         alignItems="center"
         mb={2}
-        mt={0}
+        mt={2}
       >
         <Typography
           fontFamily={`"Shorai Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif`}
@@ -292,7 +379,7 @@ export default function UserOption() {
 
         {/* ===== Content ===== */}
         <DialogContent sx={{ pt: 2 }}>
-          <Stack spacing={2}>
+          <Stack spacing={2} sx={{ mt: 1.5 }}>
             <TextField
               size="small"
               label="Name"

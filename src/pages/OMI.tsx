@@ -23,6 +23,7 @@ import { getPdfUrlOriginal, getPdfUrlMasked } from "../api/omiApi";
 import PdfViewer from "../components/PdfViewer";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { processingLogService } from "../services/processingLog.service";
 
 import {
   Table,
@@ -104,57 +105,76 @@ const normalizedAmmicInvoiceItems = ammicInvoiceItems.map(item => ({
   qty: item.a_invoiceitemqty,
   amount: item.a_invoiceitemtotalprice,
 }));
-
-const ammicInvoiceSummary = {
-  supplierName: "Automation Center Singapore POC Lab",
-  a_invoiceDate: "25-Jun-2026",
-  a_invoicetotalprice: "$ 98,400",
-  a_invoicetotalqty: 99,
-  a_invoicedeliverynoteno: "DN-AM-4455",
-  a_invoiceReff: "AMMIC-REF-8899",
+const dialogPrimaryBtn = {
+  borderRadius: 999,
+  textTransform: "none",
+  fontWeight: 600,
+  fontSize: 11,
+  height: 28,
+  px: 2,
+  backgroundColor: "#005EB8",
+  "&:hover": { opacity: 0.9 },
 };
 
-const ammicDeliveryItems = [
-  {
-    itemCode: "DIAM-41",
-    itemName: "Steel Bolt 16mm",
-    itemUM: "PCS",
-    itemQty: 35,
-  },
-  {
-    itemCode: "DIAM-02",
-    itemName: "Hex Nut 16mm",
-    itemUM: "PCS",
-    itemQty: 58,
-  },
-];
-const DO_LABELS = {
-  invoiceRef: "DO Delivery Invoice Ref",
-  deliveryInvoiceno: "DO Delivery Invoice Number",
-  deliveryNoteRef: "DO Delivery Note Ref",
-  deliveryNoteNumber: "DO Delivery Note Number",
-  customDocDate: "DO Custom Document Date",
-  customDocType: "DO Custom Document Type",
-  customDocNumber: "DO Custom Document Number",
-  deliveryDate: "DO Delivery Date",
-  totalQty: "DO Total Quantity",
+const dialogCancelBtn = {
+  borderRadius: 999,
+  textTransform: "none",
+  fontWeight: 600,
+  fontSize: 11,
+  height: 28,
+  px: 2,
 };
 
+// const ammicInvoiceSummary = {
+//   supplierName: "Automation Center Singapore POC Lab",
+//   a_invoiceDate: "25-Jun-2026",
+//   a_invoicetotalprice: "$ 98,400",
+//   a_invoicetotalqty: 99,
+//   a_invoicedeliverynoteno: "DN-AM-4455",
+//   a_invoiceReff: "AMMIC-REF-8899",
+// };
 
-const ammicDeliverySummary = {
-  a_dodInvRef: "REF-7788",
-  a_dodInvNo: "INV-DO-7788",
-  a_dodNoteReff: "NOTE-REF-22",
-  a_dodNoteNo: "DN-8899",
-  a_docDocDate: "14-Jan-2026",
-  a_docDocType: "BILL",
-  a_docDocNo: "DOC-5544",
-  a_dodDate: "14-Jan-2026",
-  a_doTotQty: ammicDeliveryItems.reduce(
-    (sum, i) => sum + i.itemQty,
-    0
-  ),
-};
+// const ammicDeliveryItems = [
+//   {
+//     itemCode: "DIAM-41",
+//     itemName: "Steel Bolt 16mm",
+//     itemUM: "PCS",
+//     itemQty: 35,
+//   },
+//   {
+//     itemCode: "DIAM-02",
+//     itemName: "Hex Nut 16mm",
+//     itemUM: "PCS",
+//     itemQty: 58,
+//   },
+// ];
+// const DO_LABELS = {
+//   invoiceRef: "DO Delivery Invoice Ref",
+//   deliveryInvoiceno: "DO Delivery Invoice Number",
+//   deliveryNoteRef: "DO Delivery Note Ref",
+//   deliveryNoteNumber: "DO Delivery Note Number",
+//   customDocDate: "DO Custom Document Date",
+//   customDocType: "DO Custom Document Type",
+//   customDocNumber: "DO Custom Document Number",
+//   deliveryDate: "DO Delivery Date",
+//   totalQty: "DO Total Quantity",
+// };
+
+
+// const ammicDeliverySummary = {
+//   a_dodInvRef: "REF-7788",
+//   a_dodInvNo: "INV-DO-7788",
+//   a_dodNoteReff: "NOTE-REF-22",
+//   a_dodNoteNo: "DN-8899",
+//   a_docDocDate: "14-Jan-2026",
+//   a_docDocType: "BILL",
+//   a_docDocNo: "DOC-5544",
+//   a_dodDate: "14-Jan-2026",
+//   a_doTotQty: ammicDeliveryItems.reduce(
+//     (sum, i) => sum + i.itemQty,
+//     0
+//   ),
+// };
 
 
 const SectionBody = ({ children }: { children: React.ReactNode }) => (
@@ -757,51 +777,11 @@ export default function OMI() {
     console.log("Delivery ammic item:", deliveryItems);
   };
 
-  // ===============================
-  // LOAD JSON
-  // ===============================
 
-  useEffect(() => {
-    const loadJson = async () => {
-      try {
-        const response = await fetch(
-          "/afd_docubot/afd-docubot-app/llm_output_in_review/EXIM AND MFR ENTERPRISE/EXIM AND MFR ENTERPRISE_25403726_20260221134512.json"
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch JSON file");
-        }
-
-        const data = await response.json();
-
-        processJsonData(data);
-      } catch (error) {
-        console.error("Failed to load JSON:", error);
-      }
-    };
-    const loadAmmic = async () => {
-      try {
-        const response = await fetch(
-          "/afd_docubot/afd-docubot-app/ammic_data_in_review/EXIM AND MFR ENTERPRISE/EXIM AND MFR ENTERPRISE_25403726_20260221134512.json"
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch JSON file");
-        }
-
-        const data = await response.json();
-
-        processAmmicJsonData(data);
-      } catch (error) {
-        console.error("Failed to load JSON:", error);
-      }
-    };
-    loadJson();
-    loadAmmic();
-  }, []);
 
   /* ---------- ROUTE STATE ---------- */
   const {
+    id: fileId,   // ✅ GET ID HERE
     fileName,
     supplierName,
     file_path,
@@ -813,6 +793,55 @@ export default function OMI() {
     is_duplicate,
   } = location.state || {};
 
+
+  // ===============================
+  // LOAD JSON
+  // ===============================
+
+  useEffect(() => {
+    if (!file_path) return;
+
+    const cleanPath = file_path.replace(/^\/+/, "");
+    const finalPath = cleanPath.endsWith(".json")
+      ? cleanPath
+      : `${cleanPath}.json`;
+
+    const loadJson = async () => {
+      try {
+        const response = await fetch(
+          `/afd_docubot/afd-docubot-app/llm_output_in_review/${finalPath}`
+        );
+        console.log(`/afd_docubot/afd-docubot-app/llm_output_in_review/${finalPath}`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch LLM JSON file");
+        }
+        const data = await response.json();
+        processJsonData(data);
+      } catch (error) {
+        console.error("Failed to load LLM JSON:", error);
+      }
+    };
+
+    const loadAmmic = async () => {
+      try {
+        const response = await fetch(
+          `/afd_docubot/afd-docubot-app/ammic_data_in_review/${finalPath}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch AMMIC JSON file");
+        }
+
+        const data = await response.json();
+        processAmmicJsonData(data);
+      } catch (error) {
+        console.error("Failed to load AMMIC JSON:", error);
+      }
+    };
+
+    loadJson();
+    loadAmmic();
+  }, [file_path]);
   const isReconciliationMatched =
     reconciliationStatus === "Matched";
   /* ---------- STATE (ALL FIRST) ---------- */
@@ -877,26 +906,51 @@ export default function OMI() {
 
   const handleReject = async () => {
     try {
-      await rejectFile({
-        fileName,
-        reason: rejectReason,
-        targetBucket: "Rejected_S3",
-      });
+      if (!fileId) {
+        console.error("File ID missing");
+        return;
+      }
+      console.log(fileId)
+      const response = await processingLogService.updateStatus(
+        [fileId],      // ✅ Pass as array
+        "Rejected",
+        rejectReason
+      );
+
+      if (!response?.updated_ids) {
+        throw new Error("Invalid API response");
+      }
 
       setStatus("Rejected");
       setRejectOpen(false);
       setRejectReason("");
+
     } catch (err) {
       console.error("Reject failed", err);
     }
   };
+
   const handleApprove = async () => {
     try {
-      // await approveFile({ fileName, remark: approveRemark });
+      if (!fileId) {
+        console.error("File ID missing");
+        return;
+      }
+
+      const response = await processingLogService.updateStatus(
+        [fileId],        // ✅ Pass as array
+        "Approved",
+        approveRemark || ""
+      );
+
+      if (!response?.updated_ids) {
+        throw new Error("Invalid API response");
+      }
 
       setStatus("Approved");
       setApproveOpen(false);
-      setApproveRemark(""); // reset
+      setApproveRemark("");
+
     } catch (err) {
       console.error("Approve failed", err);
     }
@@ -1401,11 +1455,31 @@ export default function OMI() {
         onClose={() => setRejectOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            background: "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
+            boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
+          },
+        }}
       >
-        <DialogTitle fontWeight={600}>Reject File</DialogTitle>
+        <DialogTitle
+          sx={{
+            fontWeight: 600,
+            fontSize: 15,
+            borderBottom: "1px solid #E5E7EB",
+            background: "#FFFFFF",
+          }}
+        >
+          Reject File
+        </DialogTitle>
 
-        <DialogContent>
-          <Typography fontSize={13} color="text.secondary" mb={1}>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography
+            fontSize={13}
+            color="text.secondary"
+            sx={{ mt: 1.5 }}
+          >
             Please provide a reason for rejection
           </Typography>
 
@@ -1413,19 +1487,65 @@ export default function OMI() {
             fullWidth
             multiline
             minRows={3}
+            size="small"
             placeholder="Enter rejection reason"
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
+            sx={{ mt: 1.5 }}
           />
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setRejectOpen(false)}>Cancel</Button>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid #E5E7EB",
+            background: "#FFFFFF",
+          }}
+        >
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setRejectOpen(false)}
+            sx={{
+              borderRadius: 3,
+              textTransform: "none",
+              fontWeight: 600,
+              height: 28,
+              px: 2,
+              fontSize: 11,
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.04)",
+              },
+              "&:active": {
+                opacity: 0.9,
+              },
+            }}
+          >
+            Cancel
+          </Button>
 
           <Button
             variant="contained"
+            size="small"
             color="error"
-            disabled={!rejectReason.trim()}
+            sx={{
+              borderRadius: 3,
+              textTransform: "none",
+              fontWeight: 600,
+              height: 28,
+              px: 2,
+              fontSize: 11,
+              backgroundColor: "#d14343",
+              "&:hover": {
+                backgroundColor: "#d14343",
+                opacity: 0.9,
+              },
+              "&:active": {
+                backgroundColor: "#d14343",
+                opacity: 0.95,
+              },
+            }} disabled={!rejectReason.trim()}
             onClick={handleReject}
           >
             Submit Reject

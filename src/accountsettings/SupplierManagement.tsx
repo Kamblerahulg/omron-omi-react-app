@@ -28,43 +28,84 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import { DEFAULT_PROMPT } from "../config/prompts/defaultPrompts";
+import { useEffect } from "react";
+import { supplierService } from "../services/supplierService";
 
 interface Supplier {
-    id: string;
-    name: string;
-    bu: string;
-    fileType: string;
-    preProcessing: "Y" | "N";
-    piiMasking: "Y" | "N";
-    prompt: string;
+    supplier_id: string;
+    supplier_name: string;
+    file_type: string;
+    preprocessing_required: "Y" | "N";
+    pii_masking: "Y" | "N";
+    master_prompt: string;
+    supplier_prompt: string;
+    status: "ACTIVE" | "INACTIVE";
 }
-
 const FILE_TYPES = ["CSV", "XLSX", "XML", "JSON"];
 const BU = ["India", "USA", "Japan", "Germany"];
-
-export default function SupplierManagement() {
-    const [suppliers, setSuppliers] = useState<Supplier[]>([
-        {
-            id: "1",
-            name: "Omron",
-            bu: "India",
-            fileType: "CSV",
-            preProcessing: "Y",
-            piiMasking: "N",
-            prompt: "Validate SO before ingestion",
+const dialogFieldStyle = {
+    "& .MuiInputLabel-root": {
+        fontSize: 11,
+    },
+    "& .MuiOutlinedInput-root": {
+        fontSize: 12,
+        backgroundColor: "#FFFFFF",
+        "& fieldset": {
+            borderColor: "#E5E7EB",
         },
-    ]);
+    },
+    "& .MuiOutlinedInput-input": {
+        padding: "6px 10px",
+    },
+};
 
-    const emptyForm: Supplier = {
-        id: "",
-        name: "",
-        bu: "",
-        fileType: "",
-        preProcessing: "N",
-        piiMasking: "N",
-        prompt: "",
+const dialogPrimaryBtn = {
+    borderRadius: 999,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: 11,
+    height: 28,
+    px: 2,
+    backgroundColor: "#005EB8",
+    "&:hover": { opacity: 0.9 },
+};
+
+const dialogCancelBtn = {
+    borderRadius: 999,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: 11,
+    height: 28,
+    px: 2,
+};
+export default function SupplierManagement() {
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    useEffect(() => {
+        loadSuppliers();
+    }, []);
+
+    const loadSuppliers = async () => {
+        try {
+            const data = await supplierService.list();
+            setSuppliers(data);
+        } catch (error) {
+            console.error("Failed to load suppliers:", error);
+        }
     };
-
+    const emptyForm: Supplier = {
+        supplier_id: "",
+        supplier_name: "",
+        file_type: "",
+        preprocessing_required: "N",
+        pii_masking: "N",
+        master_prompt: DEFAULT_PROMPT,
+        supplier_prompt: "",
+        status: "ACTIVE",
+    };
+    const deactivateSupplier = async (id: string) => {
+        await supplierService.update(id, { status: "INACTIVE" });
+        loadSuppliers();
+    };
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<Supplier | null>(null);
     const [form, setForm] = useState<Supplier>(emptyForm);
@@ -112,22 +153,31 @@ export default function SupplierManagement() {
         "&:hover": { backgroundColor: "#FEE2E2" },
     };
 
-    const saveSupplier = () => {
-        if (editing) {
-            setSuppliers(prev =>
-                prev.map(c => (c.id === editing.id ? form : c))
-            );
-        } else {
-            setSuppliers(prev => [
-                ...prev,
-                { ...form, id: Date.now().toString() },
-            ]);
-        }
-        setOpen(false);
-        setEditing(null);
-        setForm(emptyForm);
-    };
+    const saveSupplier = async () => {
+        const payload = {
+            supplier_id: form.supplier_id,
+            supplier_name: form.supplier_name,
+            file_type: form.file_type.toLowerCase(),
+            preprocessing_required: form.preprocessing_required,
+            pii_masking: form.pii_masking,
+            master_prompt: form.master_prompt,
+            supplier_prompt: form.supplier_prompt,
+            status: form.status,
+        };
 
+        try {
+            if (editing) {
+                await supplierService.update(editing.supplier_id, payload);
+            } else {
+                await supplierService.create(payload);
+            }
+            await loadSuppliers();
+            setOpen(false);
+            setEditing(null);
+        } catch (err) {
+            console.error("API Error", err);
+        }
+    };
     return (
         <Box>
             {/* ===== Header ===== */}
@@ -135,7 +185,7 @@ export default function SupplierManagement() {
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                mt={0}
+                mt={2}
                 mb={2}
             >
                 <Typography fontSize={20} fontWeight={600}>
@@ -148,7 +198,11 @@ export default function SupplierManagement() {
                     sx={headerButton}
                     onClick={() => {
                         setEditing(null);
-                        setForm({ ...emptyForm, prompt: DEFAULT_PROMPT });
+                        setForm({
+                            ...emptyForm,
+                            supplier_id: Date.now().toString(),
+                            master_prompt: DEFAULT_PROMPT,
+                        });
                         setOpen(true);
                     }}
                 >
@@ -201,7 +255,7 @@ export default function SupplierManagement() {
                         >
                             <TableRow>
                                 <TableCell sx={{ width: 200 }}>Supplier</TableCell>
-                                <TableCell sx={{ width: 150 }}>BU</TableCell>
+                                {/* <TableCell sx={{ width: 150 }}>BU</TableCell> */}
                                 <TableCell sx={{ width: 140 }}>File Type</TableCell>
                                 <TableCell align="center" sx={{ width: 160 }}>
                                     Pre Processing
@@ -222,7 +276,7 @@ export default function SupplierManagement() {
                         <TableBody>
                             {suppliers.map((c) => (
                                 <TableRow
-                                    key={c.id}
+                                    key={c.supplier_id}
                                     hover
                                     sx={{
                                         transition: "all 0.25s ease",
@@ -234,17 +288,17 @@ export default function SupplierManagement() {
                                     }}
                                 >
                                     <TableCell sx={{ fontWeight: 500 }}>
-                                        {c.name}
+                                        {c.supplier_name}
                                     </TableCell>
 
-                                    <TableCell>{c.bu}</TableCell>
+                                    {/* <TableCell>{c.bu}</TableCell> */}
 
-                                    <TableCell>{c.fileType}</TableCell>
+                                    <TableCell>{c.file_type}</TableCell>
 
                                     {/* 🔥 Gradient YES/NO Chips */}
                                     <TableCell align="center">
                                         <Chip
-                                            label={c.preProcessing}
+                                            label={c.preprocessing_required}
                                             size="small"
                                             sx={{
                                                 height: 18,
@@ -252,7 +306,7 @@ export default function SupplierManagement() {
                                                 fontWeight: 700,
                                                 borderRadius: 999,
                                                 background:
-                                                    c.preProcessing === "Y"
+                                                    c.preprocessing_required === "Y"
                                                         ? "linear-gradient(135deg,#34D399,#059669)"
                                                         : "linear-gradient(135deg,#F87171,#DC2626)",
                                                 color: "#fff",
@@ -263,7 +317,7 @@ export default function SupplierManagement() {
 
                                     <TableCell align="center">
                                         <Chip
-                                            label={c.piiMasking}
+                                            label={c.pii_masking}
                                             size="small"
                                             sx={{
                                                 height: 18,
@@ -271,7 +325,7 @@ export default function SupplierManagement() {
                                                 fontWeight: 700,
                                                 borderRadius: 999,
                                                 background:
-                                                    c.piiMasking === "Y"
+                                                    c.pii_masking === "Y"
                                                         ? "linear-gradient(135deg,#34D399,#059669)"
                                                         : "linear-gradient(135deg,#F87171,#DC2626)",
                                                 color: "#fff",
@@ -282,22 +336,23 @@ export default function SupplierManagement() {
 
                                     {/* 🔥 Prompt Tooltip Icon */}
                                     <TableCell align="center">
-                                        <Tooltip title="View Prompt" arrow>
+                                        <PromptTooltip title={c.master_prompt}>
                                             <IconButton
                                                 size="small"
                                                 sx={{
-                                                    backgroundColor: "#EEF2FF",
+                                                    background: "linear-gradient(135deg,#EEF2FF,#E0E7FF)",
+                                                    borderRadius: 2,
+                                                    transition: "all 0.25s ease",
                                                     "&:hover": {
-                                                        backgroundColor: "#E0E7FF",
                                                         transform: "scale(1.1)",
+                                                        boxShadow: "0 8px 20px rgba(99,102,241,0.25)",
                                                     },
                                                 }}
                                             >
-                                                <VisibilityIcon sx={{ fontSize: 16, color: "#4338CA" }} />
+                                                <VisibilityIcon sx={{ fontSize: 16, color: "#4F46E5" }} />
                                             </IconButton>
-                                        </Tooltip>
+                                        </PromptTooltip>
                                     </TableCell>
-
                                     {/* 🔥 Compact Action Buttons */}
                                     <TableCell align="center">
                                         <Box display="flex" justifyContent="center" gap={1}>
@@ -315,12 +370,8 @@ export default function SupplierManagement() {
                                                     backgroundColor: "#EFF6FF",
                                                     "&:hover": { backgroundColor: "#DBEAFE" },
                                                 }}
-                                                onClick={() => {
-                                                    setEditing(c);
-                                                    setForm({
-                                                        ...c,
-                                                        prompt: c.prompt || DEFAULT_PROMPT,
-                                                    });
+                                                onClick={async () => {
+                                                    const data = await supplierService.getById(c.supplier_id); setForm(data);
                                                     setOpen(true);
                                                 }}
                                             >
@@ -341,6 +392,7 @@ export default function SupplierManagement() {
                                                     backgroundColor: "#FEF2F2",
                                                     "&:hover": { backgroundColor: "#FEE2E2" },
                                                 }}
+                                                onClick={() => deactivateSupplier(c.supplier_id)}
                                             >
                                                 Deactivate
                                             </Button>
@@ -375,7 +427,7 @@ export default function SupplierManagement() {
                 maxWidth="md"   // 🔥 reduced from lg → md
                 PaperProps={{
                     sx: {
-                        height: "70vh",   // 🔥 reduced from 85vh
+                        height: "100vh",   // 🔥 reduced from 85vh
                         borderRadius: 4,
                         boxShadow: "0 30px 80px rgba(15,23,42,0.25)",
                     },
@@ -397,89 +449,150 @@ export default function SupplierManagement() {
                 </DialogTitle>
 
                 <DialogContent>
-                    <Stack spacing={2} mt={1}>
+                    <Stack spacing={2} sx={{ mt: 1.5 }}>
+                        <Box display="flex" gap={2} mb={2}>
+                            <TextField
+                                size="small"
+                                sx={dialogFieldStyle}
+                                fullWidth
+                                label="Supplier Name"
+                                value={form.supplier_name}
+                                onChange={(e) =>
+                                    setForm({ ...form, supplier_name: e.target.value })
+                                }
+                            />
+
+                            <FormControl
+                                fullWidth
+                                size="small"
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        fontSize: 11,
+                                    },
+                                    "& .MuiOutlinedInput-root": {
+                                        fontSize: 12,
+                                        minHeight: 34,   // match Autocomplete
+                                        backgroundColor: "#FFFFFF",
+                                        "& fieldset": {
+                                            borderColor: "#E5E7EB",
+                                        },
+                                    },
+                                    "& .MuiSelect-select": {
+                                        padding: "6px 10px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                    },
+                                }}
+                            >
+                                <InputLabel>Invoice File Type</InputLabel>
+                                <Select
+                                    value={form.file_type}
+                                    size="small"
+                                    sx={dialogFieldStyle}
+                                    onChange={(e) =>
+                                        setForm({ ...form, file_type: e.target.value })
+                                    }
+                                    label="Invoice File Type"
+                                >
+                                    {FILE_TYPES.map((f) => (
+                                        <MenuItem key={f} value={f.toLowerCase()}>
+                                            {f}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                        <Box display="flex" gap={2} mb={2}>
+
+                            <FormControl
+                                fullWidth
+                                size="small"
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        fontSize: 11,
+                                    },
+                                    "& .MuiOutlinedInput-root": {
+                                        fontSize: 12,
+                                        minHeight: 34,   // match Autocomplete
+                                        backgroundColor: "#FFFFFF",
+                                        "& fieldset": {
+                                            borderColor: "#E5E7EB",
+                                        },
+                                    },
+                                    "& .MuiSelect-select": {
+                                        padding: "6px 10px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                    },
+                                }}
+                            >
+                                <InputLabel>Pre-Processing Flag</InputLabel>
+                                <Select
+                                    size="small"
+                                    sx={dialogFieldStyle}
+                                    value={form.preprocessing_required}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            preprocessing_required:
+                                                e.target.value as "Y" | "N",
+                                        })
+                                    }
+                                    label="Pre-Processing Flag"
+                                >
+                                    <MenuItem value="Y">Yes</MenuItem>
+                                    <MenuItem value="N">No</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            <FormControl
+                                fullWidth
+                                size="small"
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        fontSize: 11,
+                                    },
+                                    "& .MuiOutlinedInput-root": {
+                                        fontSize: 12,
+                                        minHeight: 34,   // match Autocomplete
+                                        backgroundColor: "#FFFFFF",
+                                        "& fieldset": {
+                                            borderColor: "#E5E7EB",
+                                        },
+                                    },
+                                    "& .MuiSelect-select": {
+                                        padding: "6px 10px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                    },
+                                }}
+                            >
+                                <InputLabel>PII Masking Flag</InputLabel>
+                                <Select
+                                    value={form.pii_masking}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            pii_masking: e.target.value as "Y" | "N",
+                                        })
+                                    }
+                                    label="PII Masking Flag"
+                                >
+                                    <MenuItem value="Y">Yes</MenuItem>
+                                    <MenuItem value="N">No</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                        </Box>
+
                         <TextField
-                            label="Supplier Name"
-                            value={form.name}
-                            onChange={e =>
-                                setForm({ ...form, name: e.target.value })
-                            }
-                        />
-
-                        <FormControl>
-                            <InputLabel>BU</InputLabel>
-                            <Select
-                                value={form.bu}
-                                onChange={e =>
-                                    setForm({ ...form, bu: e.target.value })
-                                }
-                                label="BU"
-                            >
-                                {BU.map(c => (
-                                    <MenuItem key={c} value={c}>
-                                        {c}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl>
-                            <InputLabel>Inoice File Type</InputLabel>
-                            <Select
-                                value={form.fileType}
-                                onChange={e =>
-                                    setForm({ ...form, fileType: e.target.value })
-                                }
-                                label="Invoice File Type"
-                            >
-                                {FILE_TYPES.map(f => (
-                                    <MenuItem key={f} value={f}>
-                                        {f}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl>
-                            <InputLabel>Pre-Processing Flag</InputLabel>
-                            <Select
-                                value={form.preProcessing}
-                                onChange={e =>
-                                    setForm({
-                                        ...form,
-                                        preProcessing: e.target.value as "Y" | "N",
-                                    })
-                                }
-                                label="Pre-Processing Flag"
-                            >
-                                <MenuItem value="Y">Yes</MenuItem>
-                                <MenuItem value="N">No</MenuItem>
-                            </Select>
-                        </FormControl>
-
-                        <FormControl>
-                            <InputLabel>PII Masking Flag</InputLabel>
-                            <Select
-                                value={form.piiMasking}
-                                onChange={e =>
-                                    setForm({
-                                        ...form,
-                                        piiMasking: e.target.value as "Y" | "N",
-                                    })
-                                }
-                                label="PII Masking Flag"
-                            >
-                                <MenuItem value="Y">Yes</MenuItem>
-                                <MenuItem value="N">No</MenuItem>
-                            </Select>
-                        </FormControl>
-
-                        <TextField
-                            label="Prompt Template"
+                            label="Master Prompt"
                             multiline
-                            value={form.prompt}
-                            onChange={e => setForm({ ...form, prompt: e.target.value })}
-                            minRows={8}      // 🔥 reduced from 14
+                            value={form.master_prompt}
+                            onChange={e =>
+                                setForm({ ...form, master_prompt: e.target.value })
+                            }
+                            minRows={4}
                             maxRows={12}     // 🔥 reduced from 18
                             fullWidth
                             sx={{
@@ -498,6 +611,15 @@ export default function SupplierManagement() {
                                 },
                             }}
                         />
+                        <TextField
+                            label="Supplier Prompt"
+                            multiline
+                            value={form.supplier_prompt}
+                            onChange={e =>
+                                setForm({ ...form, supplier_prompt: e.target.value })
+                            }
+                            minRows={6}
+                        />
                     </Stack>
                 </DialogContent>
 
@@ -511,8 +633,13 @@ export default function SupplierManagement() {
                         py: 2,
                     }}
                 >
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={saveSupplier}>
+                    <Button variant="outlined"
+                        size="small"
+                        sx={dialogCancelBtn}
+                        onClick={() => setOpen(false)}>Cancel
+                    </Button>
+                    <Button variant="contained" sx={dialogPrimaryBtn}
+                        onClick={saveSupplier}>
                         Save
                     </Button>
                 </DialogActions>
@@ -521,6 +648,67 @@ export default function SupplierManagement() {
         </Box>
     );
 }
+
+const PromptTooltip = ({
+    title,
+    children,
+}: {
+    title: string;
+    children: React.ReactElement;
+}) => {
+    return (
+        <Tooltip
+            arrow
+            placement="left"
+            slotProps={{
+                popper: {
+                    modifiers: [
+                        {
+                            name: "preventOverflow",
+                            options: {
+                                boundary: "viewport",
+                                padding: 12,
+                            },
+                        },
+                    ],
+                },
+                tooltip: {
+                    sx: {
+                        background: "linear-gradient(135deg,#F8FAFC,#EEF2F7)",
+                        color: "#1E293B",
+                        borderRadius: 3,
+                        p: 2,
+                        boxShadow: "0 20px 60px rgba(15,23,42,0.15)",
+                        border: "1px solid #E2E8F0",
+                        backdropFilter: "blur(6px)",
+                        maxWidth: 600,
+                    },
+                },
+                arrow: {
+                    sx: {
+                        color: "#EEF2F7",
+                    },
+                },
+            }}
+            title={
+                <Box
+                    sx={{
+                        maxHeight: 280,
+                        overflowY: "auto",
+                        whiteSpace: "pre-wrap",
+                        fontSize: 13,
+                        lineHeight: 1.7,
+                        fontFamily: "monospace",
+                    }}
+                >
+                    {title || "No prompt available"}
+                </Box>
+            }
+        >
+            {children}
+        </Tooltip>
+    );
+};
 
 /* ===== Reusable Action Style ===== */
 const actionStyle = (color: string) => ({

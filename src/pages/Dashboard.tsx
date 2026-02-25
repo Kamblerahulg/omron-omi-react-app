@@ -364,14 +364,11 @@ const Dashboard = () => {
       const response = await processingLogService.updateStatus(
         idsToApprove,
         "Approved",
-        "Invoice matched with supplier records"
+        "Test Comment"
       );
-
-      // 🔥 Make sure API actually succeeded
       if (!response || !response.updated_ids) {
         throw new Error("Invalid API response");
       }
-
       const updatedIds: number[] = response.updated_ids;
 
       // ✅ Update ONLY ids returned from backend
@@ -771,8 +768,9 @@ const Dashboard = () => {
 
                         navigate("/omi", {
                           state: {
-                            supplierName: row.supplierName, // ✅ FIX
+                            id: row.id,   
                             fileName: row.fileName,
+                            supplierName: row.supplierName,
                             file_path: row.file_path,
                             invoiceOrderNo: row.invoiceOrderNo,
                             status: row.status,

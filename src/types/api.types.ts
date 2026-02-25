@@ -4,4 +4,5 @@ export interface ApiRequestConfig {
   data?: any;
   params?: any;
   requiresAuth?: boolean; // 🔥 controls headers dynamically
+  headers?: Record<string, string>;   // 🔥 ADD THIS
 }

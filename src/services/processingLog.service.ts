@@ -58,31 +58,36 @@ export const processingLogService = {
       return [];
     }
   },
+
   updateStatus: async (
     ids: number[],
     status: string,
-    approver_comment: string
+    approver_comment?: string,
+    recon_status?: string
   ) => {
-    const response = await fetch(
-      "https://vmog6qwktg.execute-api.ap-southeast-1.amazonaws.com/stage/invoices/processing-log",
-      {
+    try {
+      const response = await callApi<{
+        message: string;
+        updated_count: number;
+        updated_ids: number[];
+      }>({
+        url: "invoices/processing-log",
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        requiresAuth: true,
+        data: {
           ids,
           status,
+          recon_status,
           approver_comment,
-        }),
-      }
-    );
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to update processing logs");
+      return response;
+
+    } catch (error) {
+      console.error("Update status failed", error);
+      throw error;
     }
-
-    return response.json();
   },
 };
 
