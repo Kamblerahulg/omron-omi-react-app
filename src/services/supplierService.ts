@@ -31,7 +31,6 @@ export const supplierService = {
     },
 
     // 🔹 List
-    // 🔹 List
     list: async (): Promise<Supplier[]> => {
         const response = await callApi<Supplier[]>({
             url: BASE_URL,

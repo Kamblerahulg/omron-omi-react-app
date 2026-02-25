@@ -791,6 +791,8 @@ export default function OMI() {
     a_BatchNo,
     a_InterfaceRmk,
     is_duplicate,
+    startDate,     // ✅ ADD THIS
+    endDate,       // ✅ ADD THIS
   } = location.state || {};
 
 
@@ -1376,8 +1378,14 @@ export default function OMI() {
                   opacity: 0.9,
                 },
               }}
-              onClick={() => navigate("/Dashboard")}
-            >
+              onClick={() =>
+                navigate("/Dashboard", {
+                  state: {
+                    startDate,
+                    endDate,
+                  },
+                })
+              }            >
               Back
             </Button>
 

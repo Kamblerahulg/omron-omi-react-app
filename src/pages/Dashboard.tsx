@@ -26,13 +26,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { processingLogService } from "../services/processingLog.service";
-
-// ✅ Fonts: move to index.css or HTML
-// @import url('https://fonts.googleapis.com/css2?family=Shorai+Sans:wght@400;700&display=swap');
-
+import { Supplier, supplierService } from "../services/supplierService";
+import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const STATUS_OPTIONS = [
-  "NEW",
   "Pending Approval",
   "Completed",
   "Approved",
@@ -43,20 +41,25 @@ const STATUS_OPTIONS = [
   "Failed ACCPAC"
 ];
 
+
 const Dashboard = () => {
 
   // const token = localStorage.getItem("access_token");
   const [loading, setLoading] = useState(false);
-  // fetch("https://mzx9xifx1h.execute-api.ap-southeast-1.amazonaws.com/dev/file-log", {
-  //   headers: {
-  //     Authorization: `Bearer ${token}`,
-  //     "Content-Type": "application/json",
-  //   },
-  // });
-
   const navigate = useNavigate();
-
+  const location = useLocation() as {
+    state?: {
+      startDate?: string;
+      endDate?: string;
+    };
+  };
   // 🔹 Filters
+
+  const [searchParams] = useSearchParams();
+
+  const urlStart = searchParams.get("start");
+  const urlEnd = searchParams.get("end");
+
   const getDefaultDateRange = () => {
     const today = new Date();
     const last30 = new Date();
@@ -71,9 +74,18 @@ const Dashboard = () => {
   };
 
   const { start, end } = getDefaultDateRange();
+  const stateStart = location.state?.startDate;
+  const stateEnd = location.state?.endDate;
 
-  const [startDate, setStartDate] = useState(start);
-  const [endDate, setEndDate] = useState(end);
+  const [startDate, setStartDate] = useState(
+    stateStart ?? urlStart ?? start
+  );
+
+  const [endDate, setEndDate] = useState(
+    stateEnd ?? urlEnd ?? end
+  );
+  // const [startDate, setStartDate] = useState(start);
+  // const [endDate, setEndDate] = useState(end);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [supplierInput, setSupplierInput] = useState("");
   const [supplierOpen, setSupplierOpen] = useState(false);
@@ -224,8 +236,30 @@ const Dashboard = () => {
   };
 
   // 🔹 Supplier dropdown (DynamoDB – logged-in user scope)
-  const supplierList = ["Tata Motors", "Infosys", "Reliance"]; // map from API
+  const [supplierList, setSupplierList] = useState<Supplier[]>([]);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(false);
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        setLoadingSuppliers(true);
 
+        const data = await supplierService.list();
+
+        // Only ACTIVE suppliers
+        const activeSuppliers = data.filter(
+          (s) => s.status === "ACTIVE"
+        );
+
+        setSupplierList(activeSuppliers);
+      } catch (error) {
+        console.error("Failed to load suppliers:", error);
+      } finally {
+        setLoadingSuppliers(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
   // 🔹 Filter logic
 
   const filteredRows = useMemo(() => {
@@ -468,6 +502,7 @@ const Dashboard = () => {
           <InputLabel id="bu-label">BU</InputLabel>
           <Select
             labelId="bu-label"
+            size="small"
             value={bu}
             label="BU"
             onChange={(e) => setBu(e.target.value)}
@@ -478,7 +513,7 @@ const Dashboard = () => {
             </MenuItem>
 
             {BU_OPTIONS.map((b) => (
-              <MenuItem key={b} value={b}>
+              <MenuItem key={b} value={b} >
                 {b}
               </MenuItem>
             ))}
@@ -489,6 +524,8 @@ const Dashboard = () => {
         <Autocomplete
           size="small"
           options={supplierList}
+          loading={loadingSuppliers}
+          getOptionLabel={(option) => option.supplier_name}
           sx={{
             ...compactFilter,
             width: 180,   // slightly wider than others
@@ -507,10 +544,11 @@ const Dashboard = () => {
               label="Supplier Name"
               size="small"
               InputLabelProps={{ shrink: true }}
+              sx={{ fontSize: 10 }}
+
             />
           )}
         />
-
 
         {/* Status */}
         <FormControl size="small" sx={compactFilter}>
@@ -518,6 +556,7 @@ const Dashboard = () => {
           <InputLabel id="status-label">Status</InputLabel>
           <Select
             labelId="status-label"
+            size="small"
             value={status}
             label="Status"
             onChange={(e) => setStatus(e.target.value)}
@@ -768,13 +807,15 @@ const Dashboard = () => {
 
                         navigate("/omi", {
                           state: {
-                            id: row.id,   
+                            id: row.id,
                             fileName: row.fileName,
                             supplierName: row.supplierName,
                             file_path: row.file_path,
                             invoiceOrderNo: row.invoiceOrderNo,
                             status: row.status,
                             reconciliationStatus: row.reconciliationStatus,
+                            startDate,
+                            endDate,
                           },
                         })
                       }

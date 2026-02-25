@@ -197,7 +197,7 @@ export default function SupplierManagement() {
                     size="small"
                     sx={headerButton}
                     onClick={() => {
-                        setEditing(null);
+                        setEditing(null);  // ✅ correct
                         setForm({
                             ...emptyForm,
                             supplier_id: Date.now().toString(),
@@ -371,7 +371,10 @@ export default function SupplierManagement() {
                                                     "&:hover": { backgroundColor: "#DBEAFE" },
                                                 }}
                                                 onClick={async () => {
-                                                    const data = await supplierService.getById(c.supplier_id); setForm(data);
+                                                    const data = await supplierService.getById(c.supplier_id);
+
+                                                    setEditing(data);   // ✅ THIS LINE IS MISSING
+                                                    setForm(data);
                                                     setOpen(true);
                                                 }}
                                             >

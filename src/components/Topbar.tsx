@@ -1,12 +1,9 @@
 import "./Topbar.css";
 import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const Topbar = () => {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
   const userName = sessionStorage.getItem("userName") || "Admin";
 
   const logout = () => {
@@ -15,31 +12,18 @@ const Topbar = () => {
     navigate("/login", { replace: true });
   };
 
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
   return (
     <header className="topbar">
       <div className="brand"></div>
 
-      <div className="user" ref={ref}>
-        <button className="user-btn" onClick={() => setOpen(!open)}>
-          <span className="avatar">{userName[0]}</span>
-          <span className="name">{userName}</span>
-        </button>
+      <div className="user">
+        <span className="avatar">{userName[0]}</span>
+        <span className="name">{userName}</span>
 
-        {open && (
-          <div className="menu">
-            <button onClick={logout}>Log out</button>
-          </div>
-        )}
+        {/* Logout Icon */}
+        <button className="logout-btn" onClick={logout}>
+          <LogoutIcon fontSize="small" />
+        </button>
       </div>
     </header>
   );
