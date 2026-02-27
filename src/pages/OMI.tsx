@@ -808,27 +808,43 @@ export default function OMI() {
       ? cleanPath
       : `${cleanPath}.json`;
 
+    const reviewedStatuses = [
+      "Completed",
+      "Pending ACCPAC Posting",
+      "Failed ACCPAC",
+    ];
+
+    const isReviewed = reviewedStatuses.includes(routeStatus);
+
+    // 🔥 Dynamic base paths
+    const extractedBasePath = isReviewed
+      ? "/s3://omi-afd-docubot-stage-app/reviewed/extracted_invoice/"
+      : "/s3://omi-afd-docubot-stage-app/extracted_invoice/";
+
+    const ammicBasePath = isReviewed
+      ? "/s3://omi-afd-docubot-stage-app/reviewed/ammic_invoice/"
+      : "/s3://omi-afd-docubot-stage-app/ammic_invoice/";
+
     const loadJson = async () => {
       try {
-        const response = await fetch(
-          `/afd_docubot/afd-docubot-app/llm_output_in_review/${finalPath}`
-        );
-        console.log(`/afd_docubot/afd-docubot-app/llm_output_in_review/${finalPath}`)
+        const response = await fetch(`${extractedBasePath}${finalPath}`);
+        console.log("Extracted Path:", `${extractedBasePath}${finalPath}`);
+
         if (!response.ok) {
-          throw new Error("Failed to fetch LLM JSON file");
+          throw new Error("Failed to fetch Extracted JSON file");
         }
+
         const data = await response.json();
         processJsonData(data);
       } catch (error) {
-        console.error("Failed to load LLM JSON:", error);
+        console.error("Failed to load Extracted JSON:", error);
       }
     };
 
     const loadAmmic = async () => {
       try {
-        const response = await fetch(
-          `/afd_docubot/afd-docubot-app/ammic_data_in_review/${finalPath}`
-        );
+        const response = await fetch(`${ammicBasePath}${finalPath}`);
+        console.log("AMMIC Path:", `${ammicBasePath}${finalPath}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch AMMIC JSON file");
@@ -843,7 +859,8 @@ export default function OMI() {
 
     loadJson();
     loadAmmic();
-  }, [file_path]);
+  }, [file_path, routeStatus]);
+  
   const isReconciliationMatched =
     reconciliationStatus === "Matched";
   /* ---------- STATE (ALL FIRST) ---------- */
@@ -885,9 +902,9 @@ export default function OMI() {
     const folderName = baseName.substring(0, baseName.indexOf("_"));
     let url = "";
     if (pdfType === "original") {
-      url = `/afd_docubot/afd-docubot-source/processed/${file_path}.pdf`;
+      url = `/s3://omi-afd-docubot-stage-source/processed/${file_path}.pdf`;
     } else {
-      url = `/afd_docubot/afd-docubot-intermediate/masked_pdf/${file_path}.pdf`;
+      url = `s3://omi-afd-docubot-stage-intermediate/masked_pdf/${file_path}.pdf`;
     }
     console.log("Final URL:", url);
     setPdfUrl(url);
